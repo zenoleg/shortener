@@ -5,26 +5,27 @@ import (
 	"net/http"
 
 	"emperror.dev/errors"
+	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 )
 
 type Server struct {
-	srv    *http.Server
+	echo   *echo.Echo
 	logger zerolog.Logger
+	cfg    Config
 }
 
-func NewServer(cfg Config, logger zerolog.Logger) *Server {
+func NewServer(cfg Config, echoServer *echo.Echo, logger zerolog.Logger) *Server {
 	return &Server{
-		srv: &http.Server{
-			Addr: cfg.Address,
-		},
+		echo:   echoServer,
 		logger: logger,
+		cfg:    cfg,
 	}
 }
 
 func (s *Server) Run() error {
 	s.logger.Info().Msg("starting server")
-	err := s.srv.ListenAndServe()
+	err := s.echo.Start(s.cfg.Address)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		s.logger.Info().Err(err).Msg("server stopped")
 
@@ -37,7 +38,7 @@ func (s *Server) Run() error {
 }
 
 func (s *Server) Shutdown(ctx context.Context) error {
-	if err := s.srv.Shutdown(ctx); err != nil {
+	if err := s.echo.Shutdown(ctx); err != nil {
 		s.logger.Error().Err(err).Msg("server returned an error")
 	}
 

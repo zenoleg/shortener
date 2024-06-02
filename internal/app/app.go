@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 
+	"github.com/zenoleg/shortener/internal/shortener"
 	"github.com/zenoleg/shortener/internal/transport"
 	"github.com/zenoleg/shortener/third_party/logger"
 )
@@ -15,7 +16,12 @@ func Init(appVersion string) *App {
 	log := logger.NewLogger(logger.NewConfig(), appVersion)
 	transportConfig := transport.NewConfig()
 
-	server := transport.NewServer(transportConfig, log)
+	storage := shortener.NewInMemoryStorage()
+	shortenUseCase := shortener.NewShortenUseCase(storage)
+
+	shortenHandler := transport.NewShortenHandler(shortenUseCase, log)
+	echo := transport.NewEcho(shortenHandler)
+	server := transport.NewServer(transportConfig, echo, log)
 
 	return &App{server: server}
 }
