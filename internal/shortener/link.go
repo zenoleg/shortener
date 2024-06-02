@@ -66,3 +66,11 @@ func (u originalURL) String() string {
 func (u shortURL) String() string {
 	return u.encodedValue
 }
+
+func (l link) Original() string {
+	return l.original.String()
+}
+
+func (l link) Short() string {
+	return l.short.String()
+}
