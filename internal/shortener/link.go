@@ -17,6 +17,10 @@ type (
 		encodedValue string
 	}
 
+	DestinationURL struct {
+		url string
+	}
+
 	link struct {
 		original originalURL
 		short    shortURL
@@ -59,12 +63,24 @@ func newLink(original string) (link, error) {
 	}, nil
 }
 
+// todo check host is not empty
+// check for ssl too
+func newFullURL(host string, short shortURL) DestinationURL {
+	return DestinationURL{
+		url: host + "/link/" + short.String(),
+	}
+}
+
 func (u originalURL) String() string {
 	return u.original
 }
 
 func (u shortURL) String() string {
 	return u.encodedValue
+}
+
+func (u DestinationURL) String() string {
+	return u.url
 }
 
 func (l link) Original() string {

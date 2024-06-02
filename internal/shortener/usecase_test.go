@@ -41,3 +41,23 @@ func TestShortenUseCase_Handle(t *testing.T) {
 		assert.Error(t, err)
 	})
 }
+
+func TestGenerateShortenUseCase_Handle(t *testing.T) {
+	t.Parallel()
+
+	t.Run("When passed URL value is invalid, then return an error", func(t *testing.T) {
+		uc := NewGenerateShortenUseCase()
+		short, err := uc.Handle("localhost", " ")
+
+		assert.Error(t, err)
+		assert.Equal(t, "", short.String())
+	})
+
+	t.Run("When passed URL value is valid, then return shorten url", func(t *testing.T) {
+		uc := NewGenerateShortenUseCase()
+		short, err := uc.Handle("localhost", "https://google.com")
+
+		assert.NoError(t, err)
+		assert.Equal(t, "localhost/link/t92YuUGbn92bn9yL6MHc0RHa", short.String())
+	})
+}
