@@ -50,7 +50,7 @@ func newShortURL(originalURL originalURL) shortURL {
 func newLink(original string) (link, error) {
 	originalValue, err := newOriginalURL(original)
 	if err != nil {
-		return link{}, err
+		return link{}, errors.Errorf("url '%s' is invalid", original)
 	}
 
 	return link{

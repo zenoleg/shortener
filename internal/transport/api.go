@@ -40,7 +40,7 @@ func (h *ShortenHandler) Shorten(ectx echo.Context) error {
 		h.logger.Err(err).Msg("failed to shorten url")
 
 		return ectx.JSON(
-			http.StatusInternalServerError,
+			http.StatusBadRequest,
 			NewErrorResponse(err.Error()),
 		)
 	}
