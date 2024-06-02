@@ -8,7 +8,15 @@ import (
 
 type (
 	Storage interface {
+		WriteOnlyStorage
+		ReadOnlyStorage
+	}
+
+	WriteOnlyStorage interface {
 		Store(lnk link) error
+	}
+
+	ReadOnlyStorage interface {
 		GetOriginalURL(short shortURL) (string, error)
 	}
 
@@ -18,8 +26,8 @@ type (
 	}
 )
 
-func NewInMemoryStorage() InMemoryStorage {
-	return InMemoryStorage{
+func NewInMemoryStorage() *InMemoryStorage {
+	return &InMemoryStorage{
 		links: make(map[string]string, 100),
 		mx:    sync.RWMutex{},
 	}
