@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
-	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/zenoleg/shortener/internal/shortener"
 )
@@ -19,12 +18,12 @@ func TestShortenHandler_Shorten(t *testing.T) {
 	t.Run("When URL did not pass validation, then return 400", func(t *testing.T) {
 		storage := shortener.NewInMemoryStorage()
 		useCase := shortener.NewShortenUseCase(storage)
-		handler := NewShortenHandler(useCase, zerolog.Logger{})
+		handler := ShortenHandler{shorten: useCase}
 
 		e := echo.New()
 		e.Binder = NewValidationBinder()
 
-		request := prepareRequest("{}")
+		request := preparePostRequest("{}")
 
 		rec := httptest.NewRecorder()
 		ectx := e.NewContext(request, rec)
@@ -43,12 +42,12 @@ func TestShortenHandler_Shorten(t *testing.T) {
 	t.Run("When invalid URL passed, then return 400", func(t *testing.T) {
 		storage := shortener.NewInMemoryStorage()
 		useCase := shortener.NewShortenUseCase(storage)
-		handler := NewShortenHandler(useCase, zerolog.Logger{})
+		handler := ShortenHandler{shorten: useCase}
 
 		e := echo.New()
 		e.Binder = NewValidationBinder()
 
-		request := prepareRequest(`{"url": "invalid-url"}`)
+		request := preparePostRequest(`{"url": "invalid-url"}`)
 
 		rec := httptest.NewRecorder()
 		ectx := e.NewContext(request, rec)
@@ -67,12 +66,12 @@ func TestShortenHandler_Shorten(t *testing.T) {
 	t.Run("When valid URL passed, then return 201", func(t *testing.T) {
 		storage := shortener.NewInMemoryStorage()
 		useCase := shortener.NewShortenUseCase(storage)
-		handler := NewShortenHandler(useCase, zerolog.Logger{})
+		handler := ShortenHandler{shorten: useCase}
 
 		e := echo.New()
 		e.Binder = NewValidationBinder()
 
-		request := prepareRequest(`{"url": "https://example.com"}`)
+		request := preparePostRequest(`{"url": "https://example.com"}`)
 
 		rec := httptest.NewRecorder()
 		ectx := e.NewContext(request, rec)
@@ -84,9 +83,65 @@ func TestShortenHandler_Shorten(t *testing.T) {
 	})
 }
 
-func prepareRequest(body string) *http.Request {
+func TestShortenHandler_GenerateShortenURL(t *testing.T) {
+	t.Parallel()
+
+	t.Run("When URL did not pass validation, then return 400", func(t *testing.T) {
+		useCase := shortener.NewGenerateShortenUseCase()
+		handler := ShortenHandler{generateShortenURL: useCase}
+
+		e := echo.New()
+		e.Binder = NewValidationBinder()
+
+		request := prepareGetRequest("")
+
+		rec := httptest.NewRecorder()
+		ectx := e.NewContext(request, rec)
+		ectx.SetPath("/api/v1/shorten")
+
+		if assert.NoError(t, handler.Shorten(ectx)) {
+			response := ErrorResponse{}
+			err := json.Unmarshal(rec.Body.Bytes(), &response)
+
+			assert.NoError(t, err)
+			assert.Equal(t, http.StatusBadRequest, rec.Code)
+			assert.Equal(t, "url: cannot be blank.", response.Message)
+		}
+	})
+
+	t.Run("When valid URL passed, then return 200 and short URL", func(t *testing.T) {
+		useCase := shortener.NewGenerateShortenUseCase()
+		handler := ShortenHandler{generateShortenURL: useCase}
+
+		e := echo.New()
+		e.Binder = NewValidationBinder()
+
+		request := prepareGetRequest("?url=https://example.com")
+
+		rec := httptest.NewRecorder()
+		ectx := e.NewContext(request, rec)
+		ectx.SetPath("/api/v1/shorten")
+
+		if assert.NoError(t, handler.GenerateShortenURL(ectx)) {
+			resp := ShortenResponse{}
+			err := json.Unmarshal(rec.Body.Bytes(), &resp)
+
+			assert.NoError(t, err)
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, "http://example.com/link/t92YuUGbw1WY4V2LvozcwRHdoB", resp.Destination)
+		}
+	})
+}
+
+func preparePostRequest(body string) *http.Request {
 	request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
 	request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+	return request
+}
+
+func prepareGetRequest(queryParams string) *http.Request {
+	request := httptest.NewRequest(http.MethodGet, "/"+queryParams, nil)
 
 	return request
 }

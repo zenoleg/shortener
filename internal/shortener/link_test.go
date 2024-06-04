@@ -99,7 +99,7 @@ func TestShortLink(t *testing.T) {
 			lnk, err := newShortLink(testCase)
 
 			assert.NoError(t, err)
-			assert.Equal(t, "123", lnk.shortID())
+			assert.Equal(t, shortID{encoded: "123"}, lnk.shortID())
 		}
 	})
 }

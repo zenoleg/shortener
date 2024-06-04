@@ -17,10 +17,17 @@ type (
 	}
 )
 
-func NewShortenHandler(shorten shortener.ShortenUseCase, logger zerolog.Logger) ShortenHandler {
+func NewShortenHandler(
+	shorten shortener.ShortenUseCase,
+	generateShortenURL shortener.GenerateShortenUseCase,
+	getOriginal shortener.GetOriginalUseCase,
+	logger zerolog.Logger,
+) ShortenHandler {
 	return ShortenHandler{
-		shorten: shorten,
-		logger:  logger,
+		shorten:            shorten,
+		generateShortenURL: generateShortenURL,
+		getOriginal:        getOriginal,
+		logger:             logger,
 	}
 }
 
