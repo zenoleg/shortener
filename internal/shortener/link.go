@@ -2,6 +2,7 @@ package shortener
 
 import (
 	"net/url"
+	"regexp"
 	"strings"
 
 	"emperror.dev/errors"
@@ -13,6 +14,10 @@ type (
 		encoded string
 	}
 
+	shortLink struct {
+		link string
+	}
+
 	originalURL struct {
 		original string
 	}
@@ -22,6 +27,14 @@ type (
 		original originalURL
 	}
 )
+
+func newShortID(originalURL originalURL) shortID {
+	encoded := base62.Encode([]byte(originalURL.String()))
+
+	return shortID{
+		encoded: string(encoded),
+	}
+}
 
 func newOriginalURL(original string) (originalURL, error) {
 	original = strings.TrimSpace(original)
@@ -39,14 +52,6 @@ func newOriginalURL(original string) (originalURL, error) {
 	return originalURL{original: original}, nil
 }
 
-func newShortID(originalURL originalURL) shortID {
-	encoded := base62.Encode([]byte(originalURL.String()))
-
-	return shortID{
-		encoded: string(encoded),
-	}
-}
-
 func newLink(original string) (link, error) {
 	originalValue, err := newOriginalURL(original)
 	if err != nil {
@@ -56,6 +61,20 @@ func newLink(original string) (link, error) {
 	return link{
 		shortID:  newShortID(originalValue),
 		original: originalValue,
+	}, nil
+}
+
+func newShortLink(link string) (shortLink, error) {
+	link = strings.TrimSpace(link)
+	link = strings.TrimSuffix(link, "/")
+
+	pattern := regexp.MustCompile(`/link/[[:word:]]+$`)
+	if !pattern.MatchString(link) {
+		return shortLink{}, errors.New("short link is invalid")
+	}
+
+	return shortLink{
+		link: link,
 	}, nil
 }
 
@@ -73,4 +92,11 @@ func (l link) Original() string {
 
 func (l link) Short() string {
 	return l.shortID.String()
+}
+
+func (l shortLink) shortID() shortID {
+	split := strings.Split(l.link, "/")
+	id := split[len(split)-1]
+
+	return shortID{encoded: id}
 }

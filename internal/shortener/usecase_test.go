@@ -67,7 +67,15 @@ func TestGetOriginalUseCase_Handle(t *testing.T) {
 
 	t.Run("When no originals found by short ID, then return an error", func(t *testing.T) {
 		uc := NewGetOriginalUseCase(NewInMemoryStorage())
-		original, err := uc.Handle("non-existing-short-id")
+		original, err := uc.Handle("https://example.com/link/123")
+
+		assert.Error(t, err)
+		assert.Equal(t, "", original)
+	})
+
+	t.Run("When short link is invalid, then return error", func(t *testing.T) {
+		uc := NewGetOriginalUseCase(NewInMemoryStorage())
+		original, err := uc.Handle("https://example.com/123")
 
 		assert.Error(t, err)
 		assert.Equal(t, "", original)
@@ -79,7 +87,7 @@ func TestGetOriginalUseCase_Handle(t *testing.T) {
 		_ = storage.Store(lnk)
 
 		uc := NewGetOriginalUseCase(storage)
-		original, err := uc.Handle(lnk.Short())
+		original, err := uc.Handle("https://example.com/link/" + lnk.Short())
 
 		assert.NoError(t, err)
 		assert.Equal(t, "https://example.com", original)

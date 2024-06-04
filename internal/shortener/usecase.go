@@ -60,8 +60,13 @@ func NewGetOriginalUseCase(storage ReadOnlyStorage) GetOriginalUseCase {
 	}
 }
 
-func (uc GetOriginalUseCase) Handle(short string) (string, error) {
-	original, err := uc.storage.GetOriginalURL(shortID{encoded: short})
+func (uc GetOriginalUseCase) Handle(link string) (string, error) {
+	short, err := newShortLink(link)
+	if err != nil {
+		return "", err
+	}
+
+	original, err := uc.storage.GetOriginalURL(short.shortID())
 	if err != nil {
 		return "", err
 	}

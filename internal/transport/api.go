@@ -12,6 +12,7 @@ type (
 	ShortenHandler struct {
 		shorten            shortener.ShortenUseCase
 		generateShortenURL shortener.GenerateShortenUseCase
+		getOriginal        shortener.GetOriginalUseCase
 		logger             zerolog.Logger
 	}
 )
@@ -80,4 +81,31 @@ func (h *ShortenHandler) GenerateShortenURL(ectx echo.Context) error {
 	}
 
 	return ectx.JSON(http.StatusOK, NewShortenResponse(destinationURL.String()))
+}
+
+func (h *ShortenHandler) GetOriginal(ectx echo.Context) error {
+	req := OriginalRequest{}
+
+	err := ectx.Bind(&req)
+	if err != nil {
+		h.logger.Err(err).Msg("failed to bind request")
+
+		return ectx.JSON(
+			http.StatusBadRequest,
+			NewErrorResponse(err.Error()),
+		)
+	}
+
+	destinationURL, err := h.getOriginal.Handle(req.ShortID)
+
+	if err != nil {
+		h.logger.Err(err).Msg("failed to shorten url")
+
+		return ectx.JSON(
+			http.StatusBadRequest,
+			NewErrorResponse(err.Error()),
+		)
+	}
+
+	return ectx.JSON(http.StatusOK, NewShortenResponse(destinationURL))
 }

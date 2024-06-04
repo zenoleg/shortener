@@ -69,3 +69,37 @@ func TestLink(t *testing.T) {
 		}, lnk)
 	})
 }
+
+func TestShortLink(t *testing.T) {
+	t.Parallel()
+
+	t.Run("When passed short link does not ends with /link/{shortID}, then return an error", func(t *testing.T) {
+		cases := []string{
+			"https://example.com",
+			"https://example.com/link",
+			"https://example.com/link/",
+			"https://example.com/link/shortID/word",
+		}
+
+		for _, testCase := range cases {
+			lnk, err := newShortLink(testCase)
+
+			assert.Error(t, err)
+			assert.Equal(t, shortLink{}, lnk)
+		}
+	})
+
+	t.Run("When passed short link ends with /link/{shortID}, then return short id", func(t *testing.T) {
+		cases := []string{
+			"https://example.com/link/123",
+			"https://example.com/link/123/",
+		}
+
+		for _, testCase := range cases {
+			lnk, err := newShortLink(testCase)
+
+			assert.NoError(t, err)
+			assert.Equal(t, "123", lnk.shortID())
+		}
+	})
+}
