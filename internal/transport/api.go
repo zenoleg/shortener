@@ -96,7 +96,7 @@ func (h *ShortenHandler) GetOriginal(ectx echo.Context) error {
 		)
 	}
 
-	destinationURL, err := h.getOriginal.Handle(req.ShortID)
+	destinationURL, err := h.getOriginal.Handle(req.ShortURL)
 
 	if err != nil {
 		h.logger.Err(err).Msg("failed to shorten url")

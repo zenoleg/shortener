@@ -8,7 +8,7 @@ type (
 	}
 
 	OriginalRequest struct {
-		ShortID string `query:"short_id"`
+		ShortURL string `query:"short_url"`
 	}
 )
 
@@ -20,6 +20,6 @@ func (r ShortenRequest) Validate() error {
 
 func (r OriginalRequest) Validate() error {
 	return validation.ValidateStruct(&r,
-		validation.Field(&r.ShortID, validation.Required),
+		validation.Field(&r.ShortURL, validation.Required),
 	)
 }
