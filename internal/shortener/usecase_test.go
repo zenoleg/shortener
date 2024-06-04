@@ -16,14 +16,14 @@ func TestShortenUseCase_Handle(t *testing.T) {
 	t.Parallel()
 
 	t.Run("When passed URL value is invalid, then return an error", func(t *testing.T) {
-		uc := NewShortenUseCase(NewInMemoryStorage())
+		uc := NewShortenUseCase(NewInMemoryStorage(map[string]string{}))
 		err := uc.Handle(" ")
 
 		assert.Error(t, err)
 	})
 
 	t.Run("When passed URL value is valid, then save URL into a storage and return nil", func(t *testing.T) {
-		storage := NewInMemoryStorage()
+		storage := NewInMemoryStorage(map[string]string{})
 
 		uc := NewShortenUseCase(storage)
 		err := uc.Handle("http://example.com")
@@ -66,7 +66,7 @@ func TestGetOriginalUseCase_Handle(t *testing.T) {
 	t.Parallel()
 
 	t.Run("When no originals found by short ID, then return an error", func(t *testing.T) {
-		uc := NewGetOriginalUseCase(NewInMemoryStorage())
+		uc := NewGetOriginalUseCase(NewInMemoryStorage(map[string]string{}))
 		original, err := uc.Handle("https://example.com/link/123")
 
 		assert.Error(t, err)
@@ -74,7 +74,7 @@ func TestGetOriginalUseCase_Handle(t *testing.T) {
 	})
 
 	t.Run("When short link is invalid, then return error", func(t *testing.T) {
-		uc := NewGetOriginalUseCase(NewInMemoryStorage())
+		uc := NewGetOriginalUseCase(NewInMemoryStorage(map[string]string{}))
 		original, err := uc.Handle("https://example.com/123")
 
 		assert.Error(t, err)
@@ -82,7 +82,7 @@ func TestGetOriginalUseCase_Handle(t *testing.T) {
 	})
 
 	t.Run("When original found by short ID, then return it", func(t *testing.T) {
-		storage := NewInMemoryStorage()
+		storage := NewInMemoryStorage(map[string]string{})
 		lnk, _ := newLink("https://example.com")
 		_ = storage.Store(lnk)
 

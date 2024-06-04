@@ -5,7 +5,7 @@ type (
 		Message string `json:"message"`
 	}
 
-	ShortenResponse struct {
+	DestinationResponse struct {
 		Destination string `json:"destination"`
 	}
 )
@@ -14,6 +14,6 @@ func NewErrorResponse(msg string) ErrorResponse {
 	return ErrorResponse{Message: msg}
 }
 
-func NewShortenResponse(shortURL string) ShortenResponse {
-	return ShortenResponse{Destination: shortURL}
+func NewShortenResponse(shortURL string) DestinationResponse {
+	return DestinationResponse{Destination: shortURL}
 }

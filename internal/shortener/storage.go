@@ -26,9 +26,9 @@ type (
 	}
 )
 
-func NewInMemoryStorage() *InMemoryStorage {
+func NewInMemoryStorage(store map[string]string) *InMemoryStorage {
 	return &InMemoryStorage{
-		links: make(map[string]string, 100),
+		links: store,
 		mx:    sync.RWMutex{},
 	}
 }

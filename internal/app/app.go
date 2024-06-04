@@ -16,7 +16,7 @@ func Init(appVersion string) *App {
 	log := logger.NewLogger(logger.NewConfig(), appVersion)
 	transportConfig := transport.NewConfig()
 
-	storage := shortener.NewInMemoryStorage()
+	storage := shortener.NewInMemoryStorage(map[string]string{})
 	shortenUseCase := shortener.NewShortenUseCase(storage)
 	generateShortenUseCase := shortener.NewGenerateShortenUseCase()
 	getOriginalUseCase := shortener.NewGetOriginalUseCase(storage)
