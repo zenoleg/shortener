@@ -62,7 +62,14 @@ func (h *ShortenHandler) GenerateShortenURL(ectx echo.Context) error {
 		)
 	}
 
-	shortURL, err := h.generateShortenURL.Handle(ectx.Request().Host, req.URL)
+	destinationURL, err := h.generateShortenURL.Handle(
+		shortener.NewGenerateShortenQuery(
+			ectx.Scheme() == "https",
+			ectx.Request().Host,
+			req.URL,
+		),
+	)
+
 	if err != nil {
 		h.logger.Err(err).Msg("failed to shorten url")
 
@@ -72,5 +79,5 @@ func (h *ShortenHandler) GenerateShortenURL(ectx echo.Context) error {
 		)
 	}
 
-	return ectx.JSON(http.StatusOK, NewShortenResponse(shortURL.String()))
+	return ectx.JSON(http.StatusOK, NewShortenResponse(destinationURL.String()))
 }

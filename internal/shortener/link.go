@@ -9,21 +9,17 @@ import (
 )
 
 type (
+	shortID struct {
+		encoded string
+	}
+
 	originalURL struct {
 		original string
 	}
 
-	shortURL struct {
-		encodedValue string
-	}
-
-	DestinationURL struct {
-		url string
-	}
-
 	link struct {
+		shortID  shortID
 		original originalURL
-		short    shortURL
 	}
 )
 
@@ -43,11 +39,11 @@ func newOriginalURL(original string) (originalURL, error) {
 	return originalURL{original: original}, nil
 }
 
-func newShortURL(originalURL originalURL) shortURL {
+func newShortID(originalURL originalURL) shortID {
 	encoded := base62.Encode([]byte(originalURL.String()))
 
-	return shortURL{
-		encodedValue: string(encoded),
+	return shortID{
+		encoded: string(encoded),
 	}
 }
 
@@ -58,29 +54,17 @@ func newLink(original string) (link, error) {
 	}
 
 	return link{
+		shortID:  newShortID(originalValue),
 		original: originalValue,
-		short:    newShortURL(originalValue),
 	}, nil
-}
-
-// todo check host is not empty
-// check for ssl too
-func newFullURL(host string, short shortURL) DestinationURL {
-	return DestinationURL{
-		url: host + "/link/" + short.String(),
-	}
 }
 
 func (u originalURL) String() string {
 	return u.original
 }
 
-func (u shortURL) String() string {
-	return u.encodedValue
-}
-
-func (u DestinationURL) String() string {
-	return u.url
+func (u shortID) String() string {
+	return u.encoded
 }
 
 func (l link) Original() string {
@@ -88,5 +72,5 @@ func (l link) Original() string {
 }
 
 func (l link) Short() string {
-	return l.short.String()
+	return l.shortID.String()
 }

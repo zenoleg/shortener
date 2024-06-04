@@ -6,9 +6,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type alwaysErrorStorage struct{}
+type alwaysErrorFakeStorage struct{}
 
-func (s alwaysErrorStorage) Store(l link) error {
+func (s alwaysErrorFakeStorage) Store(l link) error {
 	return assert.AnError
 }
 
@@ -33,7 +33,7 @@ func TestShortenUseCase_Handle(t *testing.T) {
 	})
 
 	t.Run("When storage return an error, then use case must return it", func(t *testing.T) {
-		storage := alwaysErrorStorage{}
+		storage := alwaysErrorFakeStorage{}
 
 		uc := NewShortenUseCase(storage)
 		err := uc.Handle("http://example.com")
@@ -47,7 +47,7 @@ func TestGenerateShortenUseCase_Handle(t *testing.T) {
 
 	t.Run("When passed URL value is invalid, then return an error", func(t *testing.T) {
 		uc := NewGenerateShortenUseCase()
-		short, err := uc.Handle("localhost", " ")
+		short, err := uc.Handle(NewGenerateShortenQuery(false, "localhost", " "))
 
 		assert.Error(t, err)
 		assert.Equal(t, "", short.String())
@@ -55,9 +55,9 @@ func TestGenerateShortenUseCase_Handle(t *testing.T) {
 
 	t.Run("When passed URL value is valid, then return shorten url", func(t *testing.T) {
 		uc := NewGenerateShortenUseCase()
-		short, err := uc.Handle("localhost", "https://google.com")
+		short, err := uc.Handle(NewGenerateShortenQuery(false, "localhost", "https://google.com"))
 
 		assert.NoError(t, err)
-		assert.Equal(t, "localhost/link/t92YuUGbn92bn9yL6MHc0RHa", short.String())
+		assert.Equal(t, "http://localhost/link/t92YuUGbn92bn9yL6MHc0RHa", short.String())
 	})
 }

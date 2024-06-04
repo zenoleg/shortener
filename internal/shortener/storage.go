@@ -17,7 +17,7 @@ type (
 	}
 
 	ReadOnlyStorage interface {
-		GetOriginalURL(short shortURL) (string, error)
+		GetOriginalURL(short shortID) (string, error)
 	}
 
 	InMemoryStorage struct {
@@ -42,7 +42,7 @@ func (s *InMemoryStorage) Store(lnk link) error {
 	return nil
 }
 
-func (s *InMemoryStorage) GetOriginalURL(short shortURL) (string, error) {
+func (s *InMemoryStorage) GetOriginalURL(short shortID) (string, error) {
 	s.mx.RLock()
 	defer s.mx.RUnlock()
 

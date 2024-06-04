@@ -40,9 +40,9 @@ func TestOriginalURL(t *testing.T) {
 }
 
 func TestShortURL(t *testing.T) {
-	t.Run("When passed original URL is valid, then return a short URL", func(t *testing.T) {
+	t.Run("When passed original URL is valid, then return a shortID URL", func(t *testing.T) {
 		original, err := newOriginalURL("https://google.com")
-		short := newShortURL(original)
+		short := newShortID(original)
 
 		assert.NoError(t, err)
 		assert.Equal(t, "t92YuUGbn92bn9yL6MHc0RHa", short.String())
@@ -65,7 +65,7 @@ func TestLink(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, link{
 			original: originalURL{original: "https://google.com"},
-			short:    shortURL{encodedValue: "t92YuUGbn92bn9yL6MHc0RHa"},
+			shortID:  shortID{encoded: "t92YuUGbn92bn9yL6MHc0RHa"},
 		}, lnk)
 	})
 }
