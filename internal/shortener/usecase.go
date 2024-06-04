@@ -12,6 +12,10 @@ type (
 	}
 
 	GenerateShortenUseCase struct{}
+
+	GetOriginalUseCase struct {
+		storage ReadOnlyStorage
+	}
 )
 
 func NewShortenUseCase(storage WriteOnlyStorage) ShortenUseCase {
@@ -48,4 +52,19 @@ func (uc GenerateShortenUseCase) Handle(query GenerateShortenQuery) (Destination
 	}
 
 	return newDestinationURL(query.isSSL, query.host, lnk.shortID), nil
+}
+
+func NewGetOriginalUseCase(storage ReadOnlyStorage) GetOriginalUseCase {
+	return GetOriginalUseCase{
+		storage: storage,
+	}
+}
+
+func (uc GetOriginalUseCase) Handle(short string) (string, error) {
+	original, err := uc.storage.GetOriginalURL(shortID{encoded: short})
+	if err != nil {
+		return "", err
+	}
+
+	return original, nil
 }
