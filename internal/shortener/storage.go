@@ -7,7 +7,7 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
-var ErrNotFound *NotFoundError = &NotFoundError{}
+var ErrNotFound = &NotFoundError{}
 
 type (
 	Storage interface {
@@ -74,11 +74,16 @@ func NewLevelDBStorage(connection *leveldb.DB, logger zerolog.Logger) *LevelDBSt
 }
 
 func (s *LevelDBStorage) Store(lnk link) error {
-	return nil
+	return s.connection.Put([]byte(lnk.ShortID().String()), []byte(lnk.Original()), nil)
 }
 
 func (s *LevelDBStorage) GetOriginalURL(short shortID) (string, error) {
-	return "", nil
+	res, err := s.connection.Get([]byte(short.String()), nil)
+	if err != nil {
+		return "", ErrNotFound
+	}
+
+	return string(res), nil
 }
 
 func (e NotFoundError) Error() string {
