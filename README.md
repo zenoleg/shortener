@@ -45,3 +45,12 @@ The application uses the following environment variables, which can be set in th
 **LOGGER_FORMAT**: The format of the logs. Can be console or json. **Default is console**.
 
 **LEVEL_DB_PATH**: The path where LevelDB will store its data. **Default is /tmp**.
+
+## Endpoints
+
+| Method | Endpoint               | Description                                                                                  | Request Parameters                                                                 | Response                                                                                               |
+|--------|-------------------------|----------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| POST   | `/api/v1/shorten`       | Accepts a long URL as input and returns a shortened URL.                                      | **Body:** `{ "url": "https://www.example.com" }`                                    | **201:** `{ "destination": "http://localhost:8080/link/abc123" }` <br> **400:** `{ "message": "error" }`|
+| GET    | `/api/v1/shorten`       | Accepts a long URL as a query parameter and returns a shortened URL.                          | **Query:** `url=https://www.example.com`                                            | **200:** `{ "destination": "http://localhost:8080/link/abc123" }` <br> **400:** `{ "message": "error" }` <br> **404:** `{ "message": "error" }`|
+| GET    | `/api/v1/original`      | Accepts a shortened URL as a query parameter and returns the original long URL.               | **Query:** `url=http://localhost:8080/link/abc123`                                  | **200:** `{ "destination": "https://www.example.com" }` <br> **400:** `{ "message": "error" }` <br> **404:** `{ "message": "error" }`|
+| GET    | `/link/{shortID}`       | Accepts a short ID as a path parameter and redirects to the original long URL.                | **Path:** `{shortID}`                                                               | **301:** Redirect with `Location` header <br> **400:** `{ "message": "error" }` <br> **404:** `{ "message": "error" }`|
