@@ -48,5 +48,7 @@ func (a *App) Start() error {
 }
 
 func (a *App) Stop(ctx context.Context) error {
+	defer a.cleanup()
+
 	return a.server.Shutdown(ctx)
 }
