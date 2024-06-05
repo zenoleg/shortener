@@ -60,7 +60,7 @@ func TestGetShortUseCase_Handle(t *testing.T) {
 		uc := NewGenerateShortenUseCase(storage)
 		short, err := uc.Handle(NewGenerateShortenQuery(false, "localhost", "https://google.com"))
 
-		assert.ErrorIs(t, err, NewErrNotFound("original url not found"))
+		assert.ErrorIs(t, err, ErrNotFound)
 		assert.Equal(t, "", short.String())
 	})
 

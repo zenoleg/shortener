@@ -1,224 +1,129 @@
 package transport
 
 import (
-	"encoding/json"
 	"net/http"
-	"net/http/httptest"
-	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
+	"github.com/gavv/httpexpect/v2"
+	"github.com/rs/zerolog"
 	"github.com/zenoleg/shortener/internal/shortener"
 )
 
 func TestShortenHandler_Shorten(t *testing.T) {
-	t.Parallel()
-
-	t.Run("When URL did not pass validation, then return 400", func(t *testing.T) {
-		storage := shortener.NewInMemoryStorage(map[string]string{})
-		useCase := shortener.NewShortenUseCase(storage)
-		handler := ShortenHandler{shorten: useCase}
-
-		e := echo.New()
-		e.Binder = NewValidationBinder()
-
-		request := preparePostRequest("{}")
-
-		rec := httptest.NewRecorder()
-		ectx := e.NewContext(request, rec)
-		ectx.SetPath("/api/v1/shorten")
-
-		if assert.NoError(t, handler.Shorten(ectx)) {
-			response := ErrorResponse{}
-			err := json.Unmarshal(rec.Body.Bytes(), &response)
-
-			assert.NoError(t, err)
-			assert.Equal(t, http.StatusBadRequest, rec.Code)
-			assert.Equal(t, "url: cannot be blank.", response.Message)
-		}
+	e := httpexpect.WithConfig(httpexpect.Config{
+		Client: &http.Client{
+			Transport: httpexpect.NewBinder(initHandler(map[string]string{})),
+		},
+		Reporter: httpexpect.NewAssertReporter(t),
+		Printers: []httpexpect.Printer{
+			httpexpect.NewDebugPrinter(t, true),
+		},
 	})
 
-	t.Run("When invalid URL passed, then return 400", func(t *testing.T) {
-		storage := shortener.NewInMemoryStorage(map[string]string{})
-		useCase := shortener.NewShortenUseCase(storage)
-		handler := ShortenHandler{shorten: useCase}
-
-		e := echo.New()
-		e.Binder = NewValidationBinder()
-
-		request := preparePostRequest(`{"url": "invalid-url"}`)
-
-		rec := httptest.NewRecorder()
-		ectx := e.NewContext(request, rec)
-		ectx.SetPath("/api/v1/shorten")
-
-		if assert.NoError(t, handler.Shorten(ectx)) {
-			response := ErrorResponse{}
-			err := json.Unmarshal(rec.Body.Bytes(), &response)
-
-			assert.NoError(t, err)
-			assert.Equal(t, http.StatusBadRequest, rec.Code)
-			assert.Equal(t, "url 'invalid-url' is invalid", response.Message)
-		}
-	})
-
-	t.Run("When valid URL passed, then return 201", func(t *testing.T) {
-		storage := shortener.NewInMemoryStorage(map[string]string{})
-		useCase := shortener.NewShortenUseCase(storage)
-		handler := ShortenHandler{shorten: useCase}
-
-		e := echo.New()
-		e.Binder = NewValidationBinder()
-
-		request := preparePostRequest(`{"url": "https://example.com"}`)
-
-		rec := httptest.NewRecorder()
-		ectx := e.NewContext(request, rec)
-		ectx.SetPath("/api/v1/shorten")
-
-		if assert.NoError(t, handler.Shorten(ectx)) {
-			assert.Equal(t, http.StatusCreated, rec.Code)
-		}
-	})
+	testShorten(e)
 }
 
-func TestShortenHandler_GenerateShortenURL(t *testing.T) {
-	t.Parallel()
+func TestShortenHandler_GetShortURL(t *testing.T) {
+	store := map[string]string{
+		"t92YuUGbw1WY4V2LvozcwRHdoB": "https://example.com",
+	}
 
-	t.Run("When URL did not pass validation, then return 400", func(t *testing.T) {
-		useCase := shortener.NewGenerateShortenUseCase()
-		handler := ShortenHandler{generateShortenURL: useCase}
-
-		e := echo.New()
-		e.Binder = NewValidationBinder()
-
-		request := prepareGetRequest("")
-
-		rec := httptest.NewRecorder()
-		ectx := e.NewContext(request, rec)
-		ectx.SetPath("/api/v1/shorten")
-
-		if assert.NoError(t, handler.Shorten(ectx)) {
-			response := ErrorResponse{}
-			err := json.Unmarshal(rec.Body.Bytes(), &response)
-
-			assert.NoError(t, err)
-			assert.Equal(t, http.StatusBadRequest, rec.Code)
-			assert.Equal(t, "url: cannot be blank.", response.Message)
-		}
+	e := httpexpect.WithConfig(httpexpect.Config{
+		Client: &http.Client{
+			Transport: httpexpect.NewBinder(initHandler(store)),
+		},
+		Reporter: httpexpect.NewAssertReporter(t),
+		Printers: []httpexpect.Printer{
+			httpexpect.NewDebugPrinter(t, true),
+		},
 	})
 
-	t.Run("When valid URL passed, then return 200 and short URL", func(t *testing.T) {
-		useCase := shortener.NewGenerateShortenUseCase()
-		handler := ShortenHandler{generateShortenURL: useCase}
-
-		e := echo.New()
-		e.Binder = NewValidationBinder()
-
-		request := prepareGetRequest("?url=https://example.com")
-
-		rec := httptest.NewRecorder()
-		ectx := e.NewContext(request, rec)
-		ectx.SetPath("/api/v1/shorten")
-
-		if assert.NoError(t, handler.GetShortURL(ectx)) {
-			resp := DestinationResponse{}
-			err := json.Unmarshal(rec.Body.Bytes(), &resp)
-
-			assert.NoError(t, err)
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, "http://example.com/link/t92YuUGbw1WY4V2LvozcwRHdoB", resp.Destination)
-		}
-	})
+	testGetShortURL(e)
 }
 
 func TestShortenHandler_GetOriginal(t *testing.T) {
-	t.Parallel()
+	store := map[string]string{
+		"t92YuUGbw1WY4V2LvozcwRHdoB": "https://example.com",
+	}
 
-	t.Run("When URL did not pass validation, then return 400", func(t *testing.T) {
-		storage := shortener.NewInMemoryStorage(map[string]string{})
-		useCase := shortener.NewGetOriginalUseCase(storage)
-		handler := ShortenHandler{getOriginal: useCase}
-
-		e := echo.New()
-		e.Binder = NewValidationBinder()
-
-		request := prepareGetRequest("")
-
-		rec := httptest.NewRecorder()
-		ectx := e.NewContext(request, rec)
-		ectx.SetPath("/api/v1/original")
-
-		if assert.NoError(t, handler.GetOriginal(ectx)) {
-			response := ErrorResponse{}
-			err := json.Unmarshal(rec.Body.Bytes(), &response)
-
-			assert.NoError(t, err)
-			assert.Equal(t, http.StatusBadRequest, rec.Code)
-			assert.Equal(t, "ShortURL: cannot be blank.", response.Message)
-		}
+	e := httpexpect.WithConfig(httpexpect.Config{
+		Client: &http.Client{
+			Transport: httpexpect.NewBinder(initHandler(store)),
+		},
+		Reporter: httpexpect.NewAssertReporter(t),
+		Printers: []httpexpect.Printer{
+			httpexpect.NewDebugPrinter(t, true),
+		},
 	})
 
-	t.Run("When invalid URL passed, then return 200 and original URL", func(t *testing.T) {
-		storage := shortener.NewInMemoryStorage(map[string]string{
-			"t92YuUGbw1WY4V2LvozcwRHdoB": "http://example.com",
-		})
-
-		useCase := shortener.NewGetOriginalUseCase(storage)
-		handler := ShortenHandler{getOriginal: useCase}
-
-		e := echo.New()
-		e.Binder = NewValidationBinder()
-
-		request := prepareGetRequest("?short_url=http://example.com/t92YuUGbw1WY4V2LvozcwRHdoB")
-
-		rec := httptest.NewRecorder()
-		ectx := e.NewContext(request, rec)
-		ectx.SetPath("/api/v1/shorten")
-
-		if assert.NoError(t, handler.GetOriginal(ectx)) {
-			assert.Equal(t, http.StatusBadRequest, rec.Code)
-		}
-	})
-
-	t.Run("When valid URL passed, then return 200 and original URL", func(t *testing.T) {
-		storage := shortener.NewInMemoryStorage(map[string]string{
-			"t92YuUGbw1WY4V2LvozcwRHdoB": "http://example.com",
-		})
-
-		useCase := shortener.NewGetOriginalUseCase(storage)
-		handler := ShortenHandler{getOriginal: useCase}
-
-		e := echo.New()
-		e.Binder = NewValidationBinder()
-
-		request := prepareGetRequest("?short_url=http://example.com/link/t92YuUGbw1WY4V2LvozcwRHdoB")
-
-		rec := httptest.NewRecorder()
-		ectx := e.NewContext(request, rec)
-		ectx.SetPath("/api/v1/shorten")
-
-		if assert.NoError(t, handler.GetOriginal(ectx)) {
-			resp := DestinationResponse{}
-			err := json.Unmarshal(rec.Body.Bytes(), &resp)
-
-			assert.NoError(t, err)
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, "http://example.com", resp.Destination)
-		}
-	})
+	testGetOriginal(e)
 }
 
-func preparePostRequest(body string) *http.Request {
-	request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
-	request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+func testShorten(e *httpexpect.Expect) {
+	e.POST("/api/v1/shorten").
+		WithJSON(ShortenRequest{URL: "invalid-url"}).
+		Expect().
+		Status(http.StatusBadRequest)
 
-	return request
+	e.POST("/api/v1/shorten").
+		WithJSON(ShortenRequest{URL: "https://example.com"}).
+		Expect().
+		Status(http.StatusCreated)
 }
 
-func prepareGetRequest(queryParams string) *http.Request {
-	request := httptest.NewRequest(http.MethodGet, "/"+queryParams, nil)
+func testGetShortURL(e *httpexpect.Expect) {
+	// When URL did not pass validation, then return 400
+	e.GET("/api/v1/shorten").
+		WithQuery("url", "invalid-url").
+		Expect().
+		Status(http.StatusBadRequest)
 
-	return request
+	// When valid URL passed but not found, then return 404
+	e.GET("/api/v1/shorten").
+		WithQuery("url", "https://example.ru").
+		Expect().
+		Status(http.StatusNotFound)
+
+	// When valid URL passed and found, then return 200
+	e.GET("/api/v1/shorten").
+		WithQuery("url", "https://example.com").
+		WithHost("service.com").
+		Expect().
+		Status(http.StatusOK).
+		JSON().Object().HasValue("destination", "http://service.com/link/t92YuUGbw1WY4V2LvozcwRHdoB")
+}
+
+func testGetOriginal(e *httpexpect.Expect) {
+	// When URL did not pass validation, then return 400
+	e.GET("/api/v1/original").
+		WithQuery("url", "invalid-url").
+		Expect().
+		Status(http.StatusBadRequest)
+
+	// When valid URL passed but not found, then return 404
+	e.GET("/api/v1/original").
+		WithQuery("url", "https://host.ru/link/123").
+		Expect().
+		Status(http.StatusNotFound)
+
+	// When valid URL passed and found, then return 200
+	e.GET("/api/v1/original").
+		WithQuery("url", "https://service.com/link/t92YuUGbw1WY4V2LvozcwRHdoB").
+		WithHost("service.com").
+		Expect().
+		Status(http.StatusOK).
+		JSON().Object().HasValue("destination", "https://example.com")
+}
+
+func initHandler(store map[string]string) http.Handler {
+	storage := shortener.NewInMemoryStorage(store)
+	shortenUseCase := shortener.NewShortenUseCase(storage)
+	generateShortenUseCase := shortener.NewGenerateShortenUseCase(storage)
+	getOriginalUseCase := shortener.NewGetOriginalUseCase(storage)
+
+	shortenHandler := NewShortenHandler(shortenUseCase, generateShortenUseCase, getOriginalUseCase, zerolog.Logger{})
+
+	handler := NewEcho(shortenHandler)
+
+	return handler
 }

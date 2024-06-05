@@ -111,10 +111,17 @@ func (h *ShortenHandler) GetOriginal(ectx echo.Context) error {
 		)
 	}
 
-	destinationURL, err := h.getOriginal.Handle(req.ShortURL)
+	destinationURL, err := h.getOriginal.Handle(req.URL)
 
 	if err != nil {
 		h.logger.Err(err).Msg("failed to shorten url")
+
+		if errors.Is(err, shortener.ErrNotFound) {
+			return ectx.JSON(
+				http.StatusNotFound,
+				NewErrorResponse(err.Error()),
+			)
+		}
 
 		return ectx.JSON(
 			http.StatusBadRequest,

@@ -52,14 +52,10 @@ func (s *InMemoryStorage) GetOriginalURL(short shortID) (string, error) {
 
 	original, ok := s.links[short.String()]
 	if !ok {
-		return "", NewErrNotFound("original url not found")
+		return "", ErrNotFound
 	}
 
 	return original, nil
-}
-
-func NewErrNotFound(msg string) NotFoundError {
-	return NotFoundError{msg: msg}
 }
 
 func (e NotFoundError) Error() string {
