@@ -14,7 +14,7 @@ type (
 		shorten                shortener.ShortenUseCase
 		generateShortenURL     shortener.GetShortUseCase
 		getOriginal            shortener.GetOriginalUseCase
-		getOriginalForRedirect shortener.GetOriginalByIDUseCase
+		getOriginalForRedirect shortener.GetOriginalForRedirectUseCase
 		logger                 zerolog.Logger
 	}
 )
@@ -23,7 +23,7 @@ func NewShortenHandler(
 	shorten shortener.ShortenUseCase,
 	generateShortenURL shortener.GetShortUseCase,
 	getOriginal shortener.GetOriginalUseCase,
-	getOriginalForRedirect shortener.GetOriginalByIDUseCase,
+	getOriginalForRedirect shortener.GetOriginalForRedirectUseCase,
 	logger zerolog.Logger,
 ) ShortenHandler {
 	return ShortenHandler{

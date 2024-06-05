@@ -19,7 +19,7 @@ type (
 		storage ReadOnlyStorage
 	}
 
-	GetOriginalByIDUseCase struct {
+	GetOriginalForRedirectUseCase struct {
 		storage ReadOnlyStorage
 	}
 )
@@ -85,13 +85,13 @@ func (uc GetOriginalUseCase) Handle(shortURL string) (string, error) {
 	return original, nil
 }
 
-func NewGetOriginalForRedirectUseCase(storage ReadOnlyStorage) GetOriginalByIDUseCase {
-	return GetOriginalByIDUseCase{
+func NewGetOriginalForRedirectUseCase(storage ReadOnlyStorage) GetOriginalForRedirectUseCase {
+	return GetOriginalForRedirectUseCase{
 		storage: storage,
 	}
 }
 
-func (uc GetOriginalByIDUseCase) Handle(id string) (string, error) {
+func (uc GetOriginalForRedirectUseCase) Handle(id string) (string, error) {
 	short := shortID{encoded: id}
 
 	original, err := uc.storage.GetOriginalURL(short)
