@@ -3,6 +3,7 @@ package transport
 import (
 	"net/http"
 
+	"emperror.dev/errors"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 	"github.com/zenoleg/shortener/internal/shortener"
@@ -11,7 +12,7 @@ import (
 type (
 	ShortenHandler struct {
 		shorten            shortener.ShortenUseCase
-		generateShortenURL shortener.GenerateShortenUseCase
+		generateShortenURL shortener.GetShortUseCase
 		getOriginal        shortener.GetOriginalUseCase
 		logger             zerolog.Logger
 	}
@@ -19,7 +20,7 @@ type (
 
 func NewShortenHandler(
 	shorten shortener.ShortenUseCase,
-	generateShortenURL shortener.GenerateShortenUseCase,
+	generateShortenURL shortener.GetShortUseCase,
 	getOriginal shortener.GetOriginalUseCase,
 	logger zerolog.Logger,
 ) ShortenHandler {
@@ -57,7 +58,7 @@ func (h *ShortenHandler) Shorten(ectx echo.Context) error {
 	return ectx.NoContent(http.StatusCreated)
 }
 
-func (h *ShortenHandler) GenerateShortenURL(ectx echo.Context) error {
+func (h *ShortenHandler) GetShortURL(ectx echo.Context) error {
 	req := ShortenRequest{}
 
 	err := ectx.Bind(&req)
@@ -80,6 +81,13 @@ func (h *ShortenHandler) GenerateShortenURL(ectx echo.Context) error {
 
 	if err != nil {
 		h.logger.Err(err).Msg("failed to shorten url")
+
+		if errors.Is(err, shortener.ErrNotFound) {
+			return ectx.JSON(
+				http.StatusNotFound,
+				NewErrorResponse(err.Error()),
+			)
+		}
 
 		return ectx.JSON(
 			http.StatusBadRequest,

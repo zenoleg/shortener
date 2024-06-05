@@ -122,7 +122,7 @@ func TestShortenHandler_GenerateShortenURL(t *testing.T) {
 		ectx := e.NewContext(request, rec)
 		ectx.SetPath("/api/v1/shorten")
 
-		if assert.NoError(t, handler.GenerateShortenURL(ectx)) {
+		if assert.NoError(t, handler.GetShortURL(ectx)) {
 			resp := DestinationResponse{}
 			err := json.Unmarshal(rec.Body.Bytes(), &resp)
 

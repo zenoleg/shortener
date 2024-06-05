@@ -18,7 +18,7 @@ func Init(appVersion string) *App {
 
 	storage := shortener.NewInMemoryStorage(map[string]string{})
 	shortenUseCase := shortener.NewShortenUseCase(storage)
-	generateShortenUseCase := shortener.NewGenerateShortenUseCase()
+	generateShortenUseCase := shortener.NewGenerateShortenUseCase(storage)
 	getOriginalUseCase := shortener.NewGetOriginalUseCase(storage)
 
 	shortenHandler := transport.NewShortenHandler(shortenUseCase, generateShortenUseCase, getOriginalUseCase, log)

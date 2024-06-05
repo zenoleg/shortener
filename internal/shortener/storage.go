@@ -4,7 +4,7 @@ import (
 	"sync"
 )
 
-var NotFound *ErrNotFound = &ErrNotFound{}
+var ErrNotFound *NotFoundError = &NotFoundError{}
 
 type (
 	Storage interface {
@@ -25,7 +25,7 @@ type (
 		mx    sync.RWMutex
 	}
 
-	ErrNotFound struct {
+	NotFoundError struct {
 		msg string
 	}
 )
@@ -41,7 +41,7 @@ func (s *InMemoryStorage) Store(lnk link) error {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
-	s.links[lnk.Short()] = lnk.Original()
+	s.links[lnk.ShortID().String()] = lnk.Original()
 
 	return nil
 }
@@ -58,10 +58,10 @@ func (s *InMemoryStorage) GetOriginalURL(short shortID) (string, error) {
 	return original, nil
 }
 
-func NewErrNotFound(msg string) ErrNotFound {
-	return ErrNotFound{msg: msg}
+func NewErrNotFound(msg string) NotFoundError {
+	return NotFoundError{msg: msg}
 }
 
-func (e ErrNotFound) Error() string {
+func (e NotFoundError) Error() string {
 	return e.msg
 }

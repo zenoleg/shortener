@@ -90,8 +90,8 @@ func (l link) Original() string {
 	return l.original.String()
 }
 
-func (l link) Short() string {
-	return l.shortID.String()
+func (l link) ShortID() shortID {
+	return l.shortID
 }
 
 func (l shortLink) shortID() shortID {

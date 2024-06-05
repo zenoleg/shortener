@@ -19,7 +19,7 @@ func NewEcho(handler ShortenHandler) *echo.Echo {
 	})
 
 	g := e.Group("/api/v1")
-	g.GET("/shorten", handler.GenerateShortenURL)
+	g.GET("/shorten", handler.GetShortURL)
 	g.POST("/shorten", handler.Shorten)
 	g.GET("/original", handler.GetOriginal)
 
