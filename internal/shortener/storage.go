@@ -23,6 +23,11 @@ type (
 		GetOriginalURL(short shortID) (string, error)
 	}
 
+	LoggedStorage struct {
+		storage Storage
+		logger  zerolog.Logger
+	}
+
 	InMemoryStorage struct {
 		links map[string]string
 		mx    sync.RWMutex
@@ -30,7 +35,6 @@ type (
 
 	LevelDBStorage struct {
 		connection *leveldb.DB
-		logger     zerolog.Logger
 	}
 
 	NotFoundError struct {
@@ -66,10 +70,12 @@ func (s *InMemoryStorage) GetOriginalURL(short shortID) (string, error) {
 	return original, nil
 }
 
-func NewLevelDBStorage(connection *leveldb.DB, logger zerolog.Logger) *LevelDBStorage {
-	return &LevelDBStorage{
-		connection: connection,
-		logger:     logger,
+func NewLevelDBStorage(connection *leveldb.DB, logger zerolog.Logger) *LoggedStorage {
+	return &LoggedStorage{
+		storage: &LevelDBStorage{
+			connection: connection,
+		},
+		logger: logger,
 	}
 }
 
@@ -84,6 +90,37 @@ func (s *LevelDBStorage) GetOriginalURL(short shortID) (string, error) {
 	}
 
 	return string(res), nil
+}
+
+func (s *LoggedStorage) Store(lnk link) error {
+	err := s.storage.Store(lnk)
+	if err != nil {
+		s.logger.Err(err).Msg("failed to store link")
+
+		return err
+	}
+
+	s.logger.Info().
+		Str("short_id", lnk.ShortID().String()).
+		Str("original", lnk.Original()).
+		Msg("link stored")
+
+	return nil
+}
+
+func (s *LoggedStorage) GetOriginalURL(short shortID) (string, error) {
+	original, err := s.storage.GetOriginalURL(short)
+	if err != nil {
+		s.logger.Err(err).Msg("failed to fetch original link")
+
+		return original, err
+	}
+
+	s.logger.Info().
+		Str("short_id", short.String()).
+		Msg("link fetched")
+
+	return original, err
 }
 
 func (e NotFoundError) Error() string {
