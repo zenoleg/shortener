@@ -17,6 +17,7 @@ func NewEcho(handler ShortenHandler) *echo.Echo {
 	e.GET("/ping", func(ectx echo.Context) error {
 		return ectx.String(http.StatusOK, "pong")
 	})
+	e.GET("/link/:shortID", handler.Redirect)
 
 	g := e.Group("/api/v1")
 	g.GET("/shorten", handler.GetShortURL)

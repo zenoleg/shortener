@@ -18,6 +18,10 @@ type (
 	GetOriginalUseCase struct {
 		storage ReadOnlyStorage
 	}
+
+	GetOriginalByIDUseCase struct {
+		storage ReadOnlyStorage
+	}
 )
 
 func NewShortenUseCase(storage WriteOnlyStorage) ShortenUseCase {
@@ -74,6 +78,23 @@ func (uc GetOriginalUseCase) Handle(shortURL string) (string, error) {
 	}
 
 	original, err := uc.storage.GetOriginalURL(short.shortID())
+	if err != nil {
+		return "", err
+	}
+
+	return original, nil
+}
+
+func NewGetOriginalForRedirectUseCase(storage ReadOnlyStorage) GetOriginalByIDUseCase {
+	return GetOriginalByIDUseCase{
+		storage: storage,
+	}
+}
+
+func (uc GetOriginalByIDUseCase) Handle(id string) (string, error) {
+	short := shortID{encoded: id}
+
+	original, err := uc.storage.GetOriginalURL(short)
 	if err != nil {
 		return "", err
 	}

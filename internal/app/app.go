@@ -20,8 +20,15 @@ func Init(appVersion string) *App {
 	shortenUseCase := shortener.NewShortenUseCase(storage)
 	generateShortenUseCase := shortener.NewGenerateShortenUseCase(storage)
 	getOriginalUseCase := shortener.NewGetOriginalUseCase(storage)
+	getOriginalForRedirect := shortener.NewGetOriginalForRedirectUseCase(storage)
 
-	shortenHandler := transport.NewShortenHandler(shortenUseCase, generateShortenUseCase, getOriginalUseCase, log)
+	shortenHandler := transport.NewShortenHandler(
+		shortenUseCase,
+		generateShortenUseCase,
+		getOriginalUseCase,
+		getOriginalForRedirect,
+		log,
+	)
 	echo := transport.NewEcho(shortenHandler)
 	server := transport.NewServer(transportConfig, echo, log)
 

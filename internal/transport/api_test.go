@@ -59,6 +59,27 @@ func TestShortenHandler_GetOriginal(t *testing.T) {
 	testGetOriginal(e)
 }
 
+func TestShortenHandler_Redirect(t *testing.T) {
+	store := map[string]string{
+		"t92YuUGbw1WY4V2LvozcwRHdoB": "https://example.com",
+	}
+
+	e := httpexpect.WithConfig(httpexpect.Config{
+		Client: &http.Client{
+			Transport: httpexpect.NewBinder(initHandler(store)),
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		},
+		Reporter: httpexpect.NewAssertReporter(t),
+		Printers: []httpexpect.Printer{
+			httpexpect.NewDebugPrinter(t, true),
+		},
+	})
+
+	testRedirect(e)
+}
+
 func testShorten(e *httpexpect.Expect) {
 	e.POST("/api/v1/shorten").
 		WithJSON(ShortenRequest{URL: "invalid-url"}).
@@ -115,13 +136,34 @@ func testGetOriginal(e *httpexpect.Expect) {
 		JSON().Object().HasValue("destination", "https://example.com")
 }
 
+func testRedirect(e *httpexpect.Expect) {
+	// When valid URL passed but not found, then return 404
+	e.GET("/link/123").
+		Expect().
+		Status(http.StatusNotFound)
+
+	// When URL found, then return 301 and redirect to original URL
+	e.GET("/link/t92YuUGbw1WY4V2LvozcwRHdoB").
+		Expect().
+		Status(http.StatusMovedPermanently).
+		Header("Location").
+		IsEqual("https://example.com")
+}
+
 func initHandler(store map[string]string) http.Handler {
 	storage := shortener.NewInMemoryStorage(store)
 	shortenUseCase := shortener.NewShortenUseCase(storage)
 	generateShortenUseCase := shortener.NewGenerateShortenUseCase(storage)
 	getOriginalUseCase := shortener.NewGetOriginalUseCase(storage)
+	getForRedirect := shortener.NewGetOriginalForRedirectUseCase(storage)
 
-	shortenHandler := NewShortenHandler(shortenUseCase, generateShortenUseCase, getOriginalUseCase, zerolog.Logger{})
+	shortenHandler := NewShortenHandler(
+		shortenUseCase,
+		generateShortenUseCase,
+		getOriginalUseCase,
+		getForRedirect,
+		zerolog.Logger{},
+	)
 
 	handler := NewEcho(shortenHandler)
 

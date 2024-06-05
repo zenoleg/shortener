@@ -10,6 +10,10 @@ type (
 	OriginalRequest struct {
 		URL string `query:"url"`
 	}
+
+	RedirectRequest struct {
+		ShortID string `param:"shortID"`
+	}
 )
 
 func (r ShortenRequest) Validate() error {
@@ -21,5 +25,11 @@ func (r ShortenRequest) Validate() error {
 func (r OriginalRequest) Validate() error {
 	return validation.ValidateStruct(&r,
 		validation.Field(&r.URL, validation.Required),
+	)
+}
+
+func (r RedirectRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validation.Field(&r.ShortID, validation.Required),
 	)
 }

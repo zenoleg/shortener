@@ -11,10 +11,11 @@ import (
 
 type (
 	ShortenHandler struct {
-		shorten            shortener.ShortenUseCase
-		generateShortenURL shortener.GetShortUseCase
-		getOriginal        shortener.GetOriginalUseCase
-		logger             zerolog.Logger
+		shorten                shortener.ShortenUseCase
+		generateShortenURL     shortener.GetShortUseCase
+		getOriginal            shortener.GetOriginalUseCase
+		getOriginalForRedirect shortener.GetOriginalByIDUseCase
+		logger                 zerolog.Logger
 	}
 )
 
@@ -22,13 +23,15 @@ func NewShortenHandler(
 	shorten shortener.ShortenUseCase,
 	generateShortenURL shortener.GetShortUseCase,
 	getOriginal shortener.GetOriginalUseCase,
+	getOriginalForRedirect shortener.GetOriginalByIDUseCase,
 	logger zerolog.Logger,
 ) ShortenHandler {
 	return ShortenHandler{
-		shorten:            shorten,
-		generateShortenURL: generateShortenURL,
-		getOriginal:        getOriginal,
-		logger:             logger,
+		shorten:                shorten,
+		generateShortenURL:     generateShortenURL,
+		getOriginal:            getOriginal,
+		getOriginalForRedirect: getOriginalForRedirect,
+		logger:                 logger,
 	}
 }
 
@@ -130,4 +133,38 @@ func (h *ShortenHandler) GetOriginal(ectx echo.Context) error {
 	}
 
 	return ectx.JSON(http.StatusOK, NewShortenResponse(destinationURL))
+}
+
+func (h *ShortenHandler) Redirect(ectx echo.Context) error {
+	req := RedirectRequest{}
+
+	err := ectx.Bind(&req)
+	if err != nil {
+		h.logger.Err(err).Msg("failed to bind request")
+
+		return ectx.JSON(
+			http.StatusBadRequest,
+			NewErrorResponse(err.Error()),
+		)
+	}
+
+	destinationURL, err := h.getOriginalForRedirect.Handle(req.ShortID)
+
+	if err != nil {
+		h.logger.Err(err).Msg("failed to shorten url")
+
+		if errors.Is(err, shortener.ErrNotFound) {
+			return ectx.JSON(
+				http.StatusNotFound,
+				NewErrorResponse(err.Error()),
+			)
+		}
+
+		return ectx.JSON(
+			http.StatusBadRequest,
+			NewErrorResponse(err.Error()),
+		)
+	}
+
+	return ectx.Redirect(http.StatusMovedPermanently, destinationURL)
 }
