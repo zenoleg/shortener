@@ -2,9 +2,9 @@ package shortener
 
 import (
 	"sync"
-
-	"emperror.dev/errors"
 )
+
+var NotFound *ErrNotFound = &ErrNotFound{}
 
 type (
 	Storage interface {
@@ -23,6 +23,10 @@ type (
 	InMemoryStorage struct {
 		links map[string]string
 		mx    sync.RWMutex
+	}
+
+	ErrNotFound struct {
+		msg string
 	}
 )
 
@@ -48,8 +52,16 @@ func (s *InMemoryStorage) GetOriginalURL(short shortID) (string, error) {
 
 	original, ok := s.links[short.String()]
 	if !ok {
-		return "", errors.Errorf("original url not found by: %s", short.String())
+		return "", NewErrNotFound("original url not found")
 	}
 
 	return original, nil
+}
+
+func NewErrNotFound(msg string) ErrNotFound {
+	return ErrNotFound{msg: msg}
+}
+
+func (e ErrNotFound) Error() string {
+	return e.msg
 }
