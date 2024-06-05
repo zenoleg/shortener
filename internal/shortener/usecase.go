@@ -5,7 +5,7 @@ type (
 		storage WriteOnlyStorage
 	}
 
-	GetShortQuery struct {
+	ShortenQuery struct {
 		isSSL    bool
 		host     string
 		original string
@@ -30,17 +30,22 @@ func NewShortenUseCase(storage WriteOnlyStorage) ShortenUseCase {
 	}
 }
 
-func (uc ShortenUseCase) Handle(original string) error {
-	lnk, err := newLink(original)
+func (uc ShortenUseCase) Handle(query ShortenQuery) (DestinationURL, error) {
+	lnk, err := newLink(query.original)
 	if err != nil {
-		return err
+		return DestinationURL{}, err
 	}
 
-	return uc.storage.Store(lnk)
+	err = uc.storage.Store(lnk)
+	if err != nil {
+		return DestinationURL{}, err
+	}
+
+	return newDestinationURL(query.isSSL, query.host, lnk.shortID), nil
 }
 
-func NewGenerateShortenQuery(isSSL bool, host string, original string) GetShortQuery {
-	return GetShortQuery{
+func NewShortenQuery(isSSL bool, host string, original string) ShortenQuery {
+	return ShortenQuery{
 		isSSL:    isSSL,
 		host:     host,
 		original: original,
@@ -51,7 +56,7 @@ func NewGenerateShortenUseCase(storage ReadOnlyStorage) GetShortUseCase {
 	return GetShortUseCase{storage: storage}
 }
 
-func (uc GetShortUseCase) Handle(query GetShortQuery) (DestinationURL, error) {
+func (uc GetShortUseCase) Handle(query ShortenQuery) (DestinationURL, error) {
 	lnk, err := newLink(query.original)
 	if err != nil {
 		return DestinationURL{}, err

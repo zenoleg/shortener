@@ -88,8 +88,10 @@ func testShorten(e *httpexpect.Expect) {
 
 	e.POST("/api/v1/shorten").
 		WithJSON(ShortenRequest{URL: "https://example.com"}).
+		WithHost("service.com").
 		Expect().
-		Status(http.StatusCreated)
+		Status(http.StatusCreated).
+		JSON().Object().HasValue("destination", "http://service.com/link/t92YuUGbw1WY4V2LvozcwRHdoB")
 }
 
 func testGetShortURL(e *httpexpect.Expect) {

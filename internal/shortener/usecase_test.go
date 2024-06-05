@@ -17,28 +17,31 @@ func TestShortenUseCase_Handle(t *testing.T) {
 
 	t.Run("When passed URL value is invalid, then return an error", func(t *testing.T) {
 		uc := NewShortenUseCase(NewInMemoryStorage(map[string]string{}))
-		err := uc.Handle(" ")
+		destination, err := uc.Handle(NewShortenQuery(false, "localhost", " "))
 
 		assert.Error(t, err)
+		assert.Equal(t, "", destination.String())
 	})
 
 	t.Run("When passed URL value is valid, then save URL into a storage and return nil", func(t *testing.T) {
 		storage := NewInMemoryStorage(map[string]string{})
 
 		uc := NewShortenUseCase(storage)
-		err := uc.Handle("http://example.com")
+		destination, err := uc.Handle(NewShortenQuery(false, "localhost", "http://example.com"))
 
 		assert.NoError(t, err)
 		assert.Len(t, storage.links, 1)
+		assert.Equal(t, "http://localhost/link/t92YuUGbw1WY4V2LvoDc0RHa", destination.String())
 	})
 
 	t.Run("When storage return an error, then use case must return it", func(t *testing.T) {
 		storage := alwaysErrorFakeStorage{}
 
 		uc := NewShortenUseCase(storage)
-		err := uc.Handle("http://example.com")
+		destination, err := uc.Handle(NewShortenQuery(false, "localhost", "http://example.com"))
 
 		assert.Error(t, err)
+		assert.Equal(t, "", destination.String())
 	})
 }
 
@@ -48,7 +51,7 @@ func TestGetShortUseCase_Handle(t *testing.T) {
 	t.Run("When passed URL value is invalid, then return an error", func(t *testing.T) {
 		storage := NewInMemoryStorage(map[string]string{})
 		uc := NewGenerateShortenUseCase(storage)
-		short, err := uc.Handle(NewGenerateShortenQuery(false, "localhost", " "))
+		short, err := uc.Handle(NewShortenQuery(false, "localhost", " "))
 
 		assert.Error(t, err)
 		assert.Equal(t, "", short.String())
@@ -58,7 +61,7 @@ func TestGetShortUseCase_Handle(t *testing.T) {
 		storage := NewInMemoryStorage(map[string]string{})
 
 		uc := NewGenerateShortenUseCase(storage)
-		short, err := uc.Handle(NewGenerateShortenQuery(false, "localhost", "https://google.com"))
+		short, err := uc.Handle(NewShortenQuery(false, "localhost", "https://google.com"))
 
 		assert.ErrorIs(t, err, ErrNotFound)
 		assert.Equal(t, "", short.String())
@@ -70,7 +73,7 @@ func TestGetShortUseCase_Handle(t *testing.T) {
 		})
 
 		uc := NewGenerateShortenUseCase(storage)
-		short, err := uc.Handle(NewGenerateShortenQuery(false, "localhost", "https://google.com"))
+		short, err := uc.Handle(NewShortenQuery(false, "localhost", "https://google.com"))
 
 		assert.NoError(t, err)
 		assert.Equal(t, "http://localhost/link/t92YuUGbn92bn9yL6MHc0RHa", short.String())
