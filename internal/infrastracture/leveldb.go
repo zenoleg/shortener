@@ -24,7 +24,9 @@ func NewConfig() Config {
 }
 
 func NewLevelDBConnection(cfg Config, logger zerolog.Logger) (*leveldb.DB, func(), error) {
-	db, err := leveldb.OpenFile(fmt.Sprintf("%s/links", cfg.Path), nil)
+	path := fmt.Sprintf("%s/links", cfg.Path)
+
+	db, err := leveldb.OpenFile(path, nil)
 
 	if err != nil {
 		return nil, func() {
@@ -32,6 +34,8 @@ func NewLevelDBConnection(cfg Config, logger zerolog.Logger) (*leveldb.DB, func(
 			_ = db.Close()
 		}, err
 	}
+
+	logger.Info().Msgf("level db successfully opened on '%s'", path)
 
 	return db, func() {
 		_ = db.Close()

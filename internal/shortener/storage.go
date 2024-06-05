@@ -2,6 +2,9 @@ package shortener
 
 import (
 	"sync"
+
+	"github.com/rs/zerolog"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 var ErrNotFound *NotFoundError = &NotFoundError{}
@@ -23,6 +26,11 @@ type (
 	InMemoryStorage struct {
 		links map[string]string
 		mx    sync.RWMutex
+	}
+
+	LevelDBStorage struct {
+		connection *leveldb.DB
+		logger     zerolog.Logger
 	}
 
 	NotFoundError struct {
@@ -56,6 +64,21 @@ func (s *InMemoryStorage) GetOriginalURL(short shortID) (string, error) {
 	}
 
 	return original, nil
+}
+
+func NewLevelDBStorage(connection *leveldb.DB, logger zerolog.Logger) *LevelDBStorage {
+	return &LevelDBStorage{
+		connection: connection,
+		logger:     logger,
+	}
+}
+
+func (s *LevelDBStorage) Store(lnk link) error {
+	return nil
+}
+
+func (s *LevelDBStorage) GetOriginalURL(short shortID) (string, error) {
+	return "", nil
 }
 
 func (e NotFoundError) Error() string {

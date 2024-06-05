@@ -22,7 +22,10 @@ func main() {
 }
 
 func run() error {
-	application := app.Init(version)
+	application, err := app.Init(version)
+	if err != nil {
+		return err
+	}
 
 	stopped := make(chan struct{})
 	go func() {
