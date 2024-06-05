@@ -57,8 +57,6 @@ func (h *ShortenHandler) Shorten(ectx echo.Context) error {
 	)
 
 	if err != nil {
-		h.logger.Err(err).Msg("failed to shorten url")
-
 		return ectx.JSON(
 			http.StatusBadRequest,
 			NewErrorResponse(err.Error()),
@@ -90,8 +88,6 @@ func (h *ShortenHandler) GetShortURL(ectx echo.Context) error {
 	)
 
 	if err != nil {
-		h.logger.Err(err).Msg("failed to shorten url")
-
 		if errors.Is(err, shortener.ErrNotFound) {
 			return ectx.JSON(
 				http.StatusNotFound,
@@ -124,8 +120,6 @@ func (h *ShortenHandler) GetOriginal(ectx echo.Context) error {
 	destinationURL, err := h.getOriginal.Handle(req.URL)
 
 	if err != nil {
-		h.logger.Err(err).Msg("failed to shorten url")
-
 		if errors.Is(err, shortener.ErrNotFound) {
 			return ectx.JSON(
 				http.StatusNotFound,
@@ -158,8 +152,6 @@ func (h *ShortenHandler) Redirect(ectx echo.Context) error {
 	destinationURL, err := h.getOriginalForRedirect.Handle(req.ShortID)
 
 	if err != nil {
-		h.logger.Err(err).Msg("failed to shorten url")
-
 		if errors.Is(err, shortener.ErrNotFound) {
 			return ectx.JSON(
 				http.StatusNotFound,
