@@ -3,47 +3,40 @@ package usecase
 import "github.com/zenoleg/shortener/internal/domain"
 
 type (
-	ShortenQuery struct {
+	GetShortenQuery struct {
 		isSSL       bool
 		host        string
 		originalURL string
 	}
 
-	ShortenUseCase struct {
-		storage     WriteOnlyStorage
+	GetShortenUseCase struct {
+		storage     ReadOnlyStorage
 		idGenerator IDGenerator
 	}
 )
 
-func NewShortenQuery(isSSL bool, host string, originalURL string) ShortenQuery {
-	return ShortenQuery{
+func NewGetShortenQuery(isSSL bool, host string, originalURL string) GetShortenQuery {
+	return GetShortenQuery{
 		isSSL:       isSSL,
 		host:        host,
 		originalURL: originalURL,
 	}
 }
 
-func NewShortenUseCase(storage WriteOnlyStorage, idGenerator IDGenerator) ShortenUseCase {
-	return ShortenUseCase{
+func NewGetShortenUseCase(storage ReadOnlyStorage, idGenerator IDGenerator) GetShortenUseCase {
+	return GetShortenUseCase{
 		storage:     storage,
 		idGenerator: idGenerator,
 	}
 }
 
-func (uc ShortenUseCase) Do(query ShortenQuery) (DestinationURL, error) {
+func (uc GetShortenUseCase) Do(query ShortenQuery) (DestinationURL, error) {
 	url, err := domain.NewURL(query.originalURL)
 	if err != nil {
 		return "", err
 	}
 
 	id := uc.idGenerator.Generate(url)
-
-	shortenURL := domain.NewShortenURL(id, url)
-
-	err = uc.storage.Store(shortenURL)
-	if err != nil {
-		return "", err
-	}
 
 	return NewDestinationURL(query.isSSL, query.host, id.String()), nil
 }
