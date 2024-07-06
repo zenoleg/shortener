@@ -30,13 +30,18 @@ func NewGetShortenUseCase(storage ReadOnlyStorage, idGenerator IDGenerator) GetS
 	}
 }
 
-func (uc GetShortenUseCase) Do(query ShortenQuery) (DestinationURL, error) {
+func (uc GetShortenUseCase) Do(query GetShortenQuery) (DestinationURL, error) {
 	url, err := domain.NewURL(query.originalURL)
 	if err != nil {
 		return "", err
 	}
 
 	id := uc.idGenerator.Generate(url)
+
+	_, err = uc.storage.GetOriginalURL(id)
+	if err != nil {
+		return "", err
+	}
 
 	return NewDestinationURL(query.isSSL, query.host, id.String()), nil
 }
