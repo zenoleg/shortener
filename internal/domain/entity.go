@@ -52,3 +52,11 @@ func (i ID) String() string {
 func (u URL) String() string {
 	return string(u)
 }
+
+func (s ShortenURL) ID() string {
+	return s.id.String()
+}
+
+func (s ShortenURL) OriginalURL() string {
+	return s.originalURL.String()
+}
