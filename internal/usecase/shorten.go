@@ -13,14 +13,6 @@ type (
 		storage     WriteOnlyStorage
 		idGenerator IDGenerator
 	}
-
-	WriteOnlyStorage interface {
-		Store(shortenURL domain.ShortenURL) error
-	}
-
-	IDGenerator interface {
-		Generate(originalURL domain.URL) domain.ID
-	}
 )
 
 func NewShortenQuery(isSSL bool, host string, originalURL string) ShortenQuery {
