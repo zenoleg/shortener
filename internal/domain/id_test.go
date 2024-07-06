@@ -7,6 +7,8 @@ import (
 )
 
 func TestBase62IDGenerator_Generate(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		originalURL URL
 	}

@@ -7,6 +7,8 @@ import (
 )
 
 func TestNewID(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		id string
 	}
@@ -43,6 +45,8 @@ func TestNewID(t *testing.T) {
 }
 
 func TestNewURL(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		originalURL string
 	}
