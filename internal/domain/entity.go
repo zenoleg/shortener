@@ -44,3 +44,11 @@ func NewShortenURL(id ID, originalURL URL) ShortenURL {
 		originalURL: originalURL,
 	}
 }
+
+func (i ID) String() string {
+	return string(i)
+}
+
+func (u URL) String() string {
+	return string(u)
+}

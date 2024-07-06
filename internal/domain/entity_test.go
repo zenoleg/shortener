@@ -1,6 +1,10 @@
 package domain
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestNewID(t *testing.T) {
 	type args struct {
@@ -28,13 +32,12 @@ func TestNewID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := NewID(tt.args.id)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("NewID() error = %v, wantErr %v", err, tt.wantErr)
-				return
+
+			if tt.wantErr {
+				assert.Error(t, err)
 			}
-			if got != tt.want {
-				t.Errorf("NewID() got = %v, want %v", got, tt.want)
-			}
+
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -71,13 +74,12 @@ func TestNewURL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := NewURL(tt.args.originalURL)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("NewURL() error = %v, wantErr %v", err, tt.wantErr)
-				return
+
+			if tt.wantErr {
+				assert.Error(t, err)
 			}
-			if got != tt.want {
-				t.Errorf("NewURL() got = %v, want %v", got, tt.want)
-			}
+
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
