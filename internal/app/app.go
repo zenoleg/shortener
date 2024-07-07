@@ -6,6 +6,7 @@ import (
 	"github.com/zenoleg/shortener/internal/infrastracture"
 	"github.com/zenoleg/shortener/internal/shortener"
 	"github.com/zenoleg/shortener/internal/transport"
+	"github.com/zenoleg/shortener/internal/transport/http"
 	"github.com/zenoleg/shortener/third_party/logger"
 )
 
@@ -37,7 +38,7 @@ func Init(appVersion string) (*App, error) {
 		getOriginalForRedirect,
 		log,
 	)
-	echo := transport.NewEcho(shortenHandler)
+	echo := http.NewEcho(shortenHandler)
 	server := transport.NewServer(transportConfig, echo, log)
 
 	return &App{server: server, cleanup: closeDB}, nil

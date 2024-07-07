@@ -7,6 +7,7 @@ import (
 	"github.com/gavv/httpexpect/v2"
 	"github.com/rs/zerolog"
 	"github.com/zenoleg/shortener/internal/shortener"
+	http2 "github.com/zenoleg/shortener/internal/transport/http"
 )
 
 func TestShortenHandler_Shorten(t *testing.T) {
@@ -167,7 +168,7 @@ func initHandler(store map[string]string) http.Handler {
 		zerolog.Logger{},
 	)
 
-	handler := NewEcho(shortenHandler)
+	handler := http2.NewEcho(shortenHandler)
 
 	return handler
 }
