@@ -1,13 +1,13 @@
 package storage
 
 import (
+	"errors"
 	"sync"
 
-	"emperror.dev/errors"
 	"github.com/zenoleg/shortener/internal/domain"
 )
 
-var ErrURLNotFound = errors.New("Original URL not found")
+var ErrURLNotFound = errors.New("URL not found")
 
 type (
 	InMemoryStorage struct {

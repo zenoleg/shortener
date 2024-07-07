@@ -1,10 +1,9 @@
 package domain
 
 import (
+	"errors"
 	"net/url"
 	"strings"
-
-	"emperror.dev/errors"
 )
 
 type (
@@ -32,7 +31,7 @@ func NewURL(originalURL string) (URL, error) {
 
 	_, err := url.ParseRequestURI(originalURL)
 	if err != nil {
-		return "", errors.Wrap(err, "URL is invalid")
+		return "", errors.New("URL is not valid")
 	}
 
 	return URL(originalURL), nil

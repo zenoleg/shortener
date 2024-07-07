@@ -1,9 +1,9 @@
 package usecase
 
 import (
+	"errors"
 	"testing"
 
-	"emperror.dev/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/zenoleg/shortener/internal/domain"

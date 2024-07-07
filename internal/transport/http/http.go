@@ -2,9 +2,9 @@ package http
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
-	"emperror.dev/errors"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 )
