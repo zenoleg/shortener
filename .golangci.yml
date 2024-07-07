@@ -17,6 +17,9 @@ linters-settings:
       - G404
       - G501
   gocritic:
+    disabled-checks:
+      - hugeParam
+      - paramTypeCombine
     enable-all: true
   goimports:
     local-prefixes: github.com/zenoleg/shortener
