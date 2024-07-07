@@ -9,29 +9,29 @@ import (
 )
 
 type (
-	ShortenHandler struct {
-		shorten usecase.ShortenUseCase
-		logger  zerolog.Logger
+	GetShortURLHandler struct {
+		getShort usecase.GetShortUseCase
+		logger   zerolog.Logger
 	}
 
-	ShortenRequest struct {
-		URL string `json:"url"`
+	GetShortURLRequest struct {
+		URL string `query:"url"`
 	}
 
-	ShortenResponse struct {
+	GetShortURLResponse struct {
 		Destination string `json:"destination"`
 	}
 )
 
-func NewShortenHandler(shorten usecase.ShortenUseCase, logger zerolog.Logger) ShortenHandler {
-	return ShortenHandler{
-		shorten: shorten,
-		logger:  logger,
+func NewGetShortURLHandler(getShort usecase.GetShortUseCase, logger zerolog.Logger) GetShortURLHandler {
+	return GetShortURLHandler{
+		getShort: getShort,
+		logger:   logger,
 	}
 }
 
-func (h *ShortenHandler) Handle(ectx echo.Context) error {
-	req := ShortenRequest{}
+func (h *GetShortURLHandler) Handle(ectx echo.Context) error {
+	req := GetShortURLRequest{}
 
 	err := ectx.Bind(&req)
 	if err != nil {
@@ -40,8 +40,8 @@ func (h *ShortenHandler) Handle(ectx echo.Context) error {
 		return ectx.NoContent(http.StatusBadRequest)
 	}
 
-	destination, err := h.shorten.Do(
-		usecase.NewShortenQuery(
+	destination, err := h.getShort.Do(
+		usecase.NewGetShortURLQuery(
 			ectx.Scheme() == "https",
 			ectx.Request().Host,
 			req.URL,
@@ -57,6 +57,6 @@ func (h *ShortenHandler) Handle(ectx echo.Context) error {
 
 	return ectx.JSON(
 		http.StatusOK,
-		ShortenResponse{Destination: destination.String()},
+		GetShortURLResponse{Destination: destination.String()},
 	)
 }

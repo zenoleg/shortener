@@ -21,7 +21,7 @@ func TestGetShortenUseCase_Do(t *testing.T) {
 
 		uc := NewGetShortenUseCase(storage, idGenerator)
 
-		destination, err := uc.Do(NewGetShortenQuery(false, "localhost", ""))
+		destination, err := uc.Do(NewGetShortURLQuery(false, "localhost", ""))
 
 		assert.Empty(t, destination)
 		assert.Error(t, err)
@@ -43,7 +43,7 @@ func TestGetShortenUseCase_Do(t *testing.T) {
 
 		uc := NewGetShortenUseCase(storage, idGenerator)
 
-		destination, err := uc.Do(NewGetShortenQuery(false, "localhost", "https://example.com"))
+		destination, err := uc.Do(NewGetShortURLQuery(false, "localhost", "https://example.com"))
 
 		assert.Empty(t, destination)
 		assert.Error(t, err)
@@ -65,7 +65,7 @@ func TestGetShortenUseCase_Do(t *testing.T) {
 
 		uc := NewGetShortenUseCase(storage, idGenerator)
 
-		destination, err := uc.Do(NewGetShortenQuery(true, "localhost", "https://example.com"))
+		destination, err := uc.Do(NewGetShortURLQuery(true, "localhost", "https://example.com"))
 
 		assert.NoError(t, err)
 		assert.Equal(t, "https://localhost/link/t92YuUGbw1WY4V2LvoDc0RHa", destination.String())

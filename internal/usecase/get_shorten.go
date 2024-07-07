@@ -3,34 +3,34 @@ package usecase
 import "github.com/zenoleg/shortener/internal/domain"
 
 type (
-	GetShortenQuery struct {
+	GetShortURLQuery struct {
 		isSSL       bool
 		host        string
 		originalURL string
 	}
 
-	GetShortenUseCase struct {
+	GetShortUseCase struct {
 		storage     ReadOnlyStorage
 		idGenerator IDGenerator
 	}
 )
 
-func NewGetShortenQuery(isSSL bool, host string, originalURL string) GetShortenQuery {
-	return GetShortenQuery{
+func NewGetShortURLQuery(isSSL bool, host string, originalURL string) GetShortURLQuery {
+	return GetShortURLQuery{
 		isSSL:       isSSL,
 		host:        host,
 		originalURL: originalURL,
 	}
 }
 
-func NewGetShortenUseCase(storage ReadOnlyStorage, idGenerator IDGenerator) GetShortenUseCase {
-	return GetShortenUseCase{
+func NewGetShortenUseCase(storage ReadOnlyStorage, idGenerator IDGenerator) GetShortUseCase {
+	return GetShortUseCase{
 		storage:     storage,
 		idGenerator: idGenerator,
 	}
 }
 
-func (uc GetShortenUseCase) Do(query GetShortenQuery) (DestinationURL, error) {
+func (uc GetShortUseCase) Do(query GetShortURLQuery) (DestinationURL, error) {
 	url, err := domain.NewURL(query.originalURL)
 	if err != nil {
 		return "", err
