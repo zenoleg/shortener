@@ -32,7 +32,7 @@ func NewURL(originalURL string) (URL, error) {
 
 	_, err := url.ParseRequestURI(originalURL)
 	if err != nil {
-		return "", errors.Wrap(err, "Original URL is invalid")
+		return "", errors.Wrap(err, "URL is invalid")
 	}
 
 	return URL(originalURL), nil
