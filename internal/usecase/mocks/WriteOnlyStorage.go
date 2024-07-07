@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	mock "github.com/stretchr/testify/mock"
 	domain "github.com/zenoleg/shortener/internal/domain"
 )
@@ -12,17 +14,17 @@ type WriteOnlyStorage struct {
 	mock.Mock
 }
 
-// Store provides a mock function with given fields: shortenURL
-func (_m *WriteOnlyStorage) Store(shortenURL domain.ShortenURL) error {
-	ret := _m.Called(shortenURL)
+// Store provides a mock function with given fields: ctx, shortenURL
+func (_m *WriteOnlyStorage) Store(ctx context.Context, shortenURL domain.ShortenURL) error {
+	ret := _m.Called(ctx, shortenURL)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Store")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(domain.ShortenURL) error); ok {
-		r0 = rf(shortenURL)
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ShortenURL) error); ok {
+		r0 = rf(ctx, shortenURL)
 	} else {
 		r0 = ret.Error(0)
 	}

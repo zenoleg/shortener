@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"strings"
 
 	"github.com/zenoleg/shortener/internal/domain"
@@ -14,7 +15,7 @@ func NewGetOriginalUseCase(storage ReadOnlyStorage) GetOriginalUseCase {
 	return GetOriginalUseCase{storage: storage}
 }
 
-func (uc GetOriginalUseCase) Do(shortURL domain.URL) (domain.URL, error) {
+func (uc GetOriginalUseCase) Do(ctx context.Context, shortURL domain.URL) (domain.URL, error) {
 	url := shortURL.String()
 	split := strings.Split(url, "/")
 
@@ -23,7 +24,7 @@ func (uc GetOriginalUseCase) Do(shortURL domain.URL) (domain.URL, error) {
 		return "", err
 	}
 
-	original, err := uc.storage.GetOriginalURL(id)
+	original, err := uc.storage.GetOriginalURL(ctx, id)
 	if err != nil {
 		return "", err
 	}

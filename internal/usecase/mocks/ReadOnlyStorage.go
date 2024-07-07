@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	mock "github.com/stretchr/testify/mock"
 	domain "github.com/zenoleg/shortener/internal/domain"
 )
@@ -12,9 +14,9 @@ type ReadOnlyStorage struct {
 	mock.Mock
 }
 
-// GetOriginalURL provides a mock function with given fields: id
-func (_m *ReadOnlyStorage) GetOriginalURL(id domain.ID) (domain.URL, error) {
-	ret := _m.Called(id)
+// GetOriginalURL provides a mock function with given fields: ctx, id
+func (_m *ReadOnlyStorage) GetOriginalURL(ctx context.Context, id domain.ID) (domain.URL, error) {
+	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetOriginalURL")
@@ -22,17 +24,17 @@ func (_m *ReadOnlyStorage) GetOriginalURL(id domain.ID) (domain.URL, error) {
 
 	var r0 domain.URL
 	var r1 error
-	if rf, ok := ret.Get(0).(func(domain.ID) (domain.URL, error)); ok {
-		return rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ID) (domain.URL, error)); ok {
+		return rf(ctx, id)
 	}
-	if rf, ok := ret.Get(0).(func(domain.ID) domain.URL); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ID) domain.URL); ok {
+		r0 = rf(ctx, id)
 	} else {
 		r0 = ret.Get(0).(domain.URL)
 	}
 
-	if rf, ok := ret.Get(1).(func(domain.ID) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(context.Context, domain.ID) error); ok {
+		r1 = rf(ctx, id)
 	} else {
 		r1 = ret.Error(1)
 	}

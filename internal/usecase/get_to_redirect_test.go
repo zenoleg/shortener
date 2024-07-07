@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,13 +16,13 @@ func TestNewGetOriginalForRedirectUseCase_Do(t *testing.T) {
 		storage := mocks.NewReadOnlyStorage(t)
 
 		storage.
-			On("GetOriginalURL", domain.ID("123")).
+			On("GetOriginalURL", context.TODO(), domain.ID("123")).
 			Return(domain.URL(""), assert.AnError).
 			Once()
 
 		uc := NewGetOriginalForRedirectUseCase(storage)
 
-		original, err := uc.Do("123")
+		original, err := uc.Do(context.TODO(), "123")
 
 		assert.Error(t, err)
 		assert.Equal(t, "", original.String())
@@ -31,13 +32,13 @@ func TestNewGetOriginalForRedirectUseCase_Do(t *testing.T) {
 		storage := mocks.NewReadOnlyStorage(t)
 
 		storage.
-			On("GetOriginalURL", domain.ID("123")).
+			On("GetOriginalURL", context.TODO(), domain.ID("123")).
 			Return(domain.URL("https://example.com"), nil).
 			Once()
 
 		uc := NewGetOriginalForRedirectUseCase(storage)
 
-		original, err := uc.Do("123")
+		original, err := uc.Do(context.TODO(), "123")
 
 		assert.NoError(t, err)
 		assert.Equal(t, "https://example.com", original.String())

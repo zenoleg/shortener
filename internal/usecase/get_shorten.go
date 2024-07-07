@@ -1,6 +1,10 @@
 package usecase
 
-import "github.com/zenoleg/shortener/internal/domain"
+import (
+	"context"
+
+	"github.com/zenoleg/shortener/internal/domain"
+)
 
 type (
 	GetShortURLQuery struct {
@@ -30,7 +34,7 @@ func NewGetShortenUseCase(storage ReadOnlyStorage, idGenerator IDGenerator) GetS
 	}
 }
 
-func (uc GetShortUseCase) Do(query GetShortURLQuery) (DestinationURL, error) {
+func (uc GetShortUseCase) Do(ctx context.Context, query GetShortURLQuery) (DestinationURL, error) {
 	url, err := domain.NewURL(query.originalURL)
 	if err != nil {
 		return "", err
@@ -38,7 +42,7 @@ func (uc GetShortUseCase) Do(query GetShortURLQuery) (DestinationURL, error) {
 
 	id := uc.idGenerator.Generate(url)
 
-	_, err = uc.storage.GetOriginalURL(id)
+	_, err = uc.storage.GetOriginalURL(ctx, id)
 	if err != nil {
 		return "", err
 	}

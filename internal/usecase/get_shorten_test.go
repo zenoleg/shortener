@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,7 +22,7 @@ func TestGetShortenUseCase_Do(t *testing.T) {
 
 		uc := NewGetShortenUseCase(storage, idGenerator)
 
-		destination, err := uc.Do(NewGetShortURLQuery(false, "localhost", ""))
+		destination, err := uc.Do(context.TODO(), NewGetShortURLQuery(false, "localhost", ""))
 
 		assert.Empty(t, destination)
 		assert.Error(t, err)
@@ -32,7 +33,7 @@ func TestGetShortenUseCase_Do(t *testing.T) {
 		idGenerator := mocks.NewIDGenerator(t)
 
 		storage.
-			On("GetOriginalURL", mock.Anything).
+			On("GetOriginalURL", context.TODO(), mock.Anything).
 			Return(domain.URL(""), assert.AnError).
 			Once()
 
@@ -43,7 +44,7 @@ func TestGetShortenUseCase_Do(t *testing.T) {
 
 		uc := NewGetShortenUseCase(storage, idGenerator)
 
-		destination, err := uc.Do(NewGetShortURLQuery(false, "localhost", "https://example.com"))
+		destination, err := uc.Do(context.TODO(), NewGetShortURLQuery(false, "localhost", "https://example.com"))
 
 		assert.Empty(t, destination)
 		assert.Error(t, err)
@@ -54,7 +55,7 @@ func TestGetShortenUseCase_Do(t *testing.T) {
 		idGenerator := mocks.NewIDGenerator(t)
 
 		storage.
-			On("GetOriginalURL", mock.Anything).
+			On("GetOriginalURL", context.TODO(), mock.Anything).
 			Return(domain.URL("https://example.com"), nil).
 			Once()
 
@@ -65,7 +66,7 @@ func TestGetShortenUseCase_Do(t *testing.T) {
 
 		uc := NewGetShortenUseCase(storage, idGenerator)
 
-		destination, err := uc.Do(NewGetShortURLQuery(true, "localhost", "https://example.com"))
+		destination, err := uc.Do(context.TODO(), NewGetShortURLQuery(true, "localhost", "https://example.com"))
 
 		assert.NoError(t, err)
 		assert.Equal(t, "https://localhost/link/t92YuUGbw1WY4V2LvoDc0RHa", destination.String())

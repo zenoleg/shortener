@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -22,7 +23,7 @@ func TestShortenUseCase_Do(t *testing.T) {
 
 		uc := NewShortenUseCase(storage, idGenerator)
 
-		destination, err := uc.Do(NewShortenQuery(false, "localhost", ""))
+		destination, err := uc.Do(context.TODO(), NewShortenQuery(false, "localhost", ""))
 
 		assert.Empty(t, destination)
 		assert.Error(t, err)
@@ -33,7 +34,7 @@ func TestShortenUseCase_Do(t *testing.T) {
 		idGenerator := mocks.NewIDGenerator(t)
 
 		storage.
-			On("Store", mock.Anything).
+			On("Store", context.TODO(), mock.Anything).
 			Return(nil).
 			Once()
 
@@ -44,7 +45,7 @@ func TestShortenUseCase_Do(t *testing.T) {
 
 		uc := NewShortenUseCase(storage, idGenerator)
 
-		destination, err := uc.Do(NewShortenQuery(false, "localhost", "https://example.com"))
+		destination, err := uc.Do(context.TODO(), NewShortenQuery(false, "localhost", "https://example.com"))
 
 		assert.NoError(t, err)
 		assert.Equal(t, "http://localhost/link/t92YuUGbw1WY4V2LvoDc0RHa", destination.String())
@@ -55,7 +56,7 @@ func TestShortenUseCase_Do(t *testing.T) {
 		idGenerator := mocks.NewIDGenerator(t)
 
 		storage.
-			On("Store", mock.Anything).
+			On("Store", context.TODO(), mock.Anything).
 			Return(errors.New("error")).
 			Once()
 
@@ -66,7 +67,7 @@ func TestShortenUseCase_Do(t *testing.T) {
 
 		uc := NewShortenUseCase(storage, idGenerator)
 
-		destination, err := uc.Do(NewShortenQuery(false, "localhost", "https://example.com"))
+		destination, err := uc.Do(context.TODO(), NewShortenQuery(false, "localhost", "https://example.com"))
 
 		assert.Error(t, err)
 		assert.Empty(t, destination)

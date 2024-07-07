@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,12 +16,12 @@ func TestGetOriginalUseCase_Do(t *testing.T) {
 		storage := mocks.NewReadOnlyStorage(t)
 
 		storage.
-			On("GetOriginalURL", domain.ID("123")).
+			On("GetOriginalURL", context.TODO(), domain.ID("123")).
 			Return(domain.URL(""), assert.AnError).
 			Once()
 
 		uc := NewGetOriginalUseCase(storage)
-		original, err := uc.Do("http://localhost/link/123")
+		original, err := uc.Do(context.TODO(), "http://localhost/link/123")
 
 		assert.Error(t, err)
 		assert.Empty(t, original.String())
@@ -30,12 +31,12 @@ func TestGetOriginalUseCase_Do(t *testing.T) {
 		storage := mocks.NewReadOnlyStorage(t)
 
 		storage.
-			On("GetOriginalURL", domain.ID("123")).
+			On("GetOriginalURL", context.TODO(), domain.ID("123")).
 			Return(domain.URL("https://example.com"), nil).
 			Once()
 
 		uc := NewGetOriginalUseCase(storage)
-		original, err := uc.Do("http://localhost/link/123")
+		original, err := uc.Do(context.TODO(), "http://localhost/link/123")
 
 		assert.NoError(t, err)
 		assert.Equal(t, "https://example.com", original.String())
@@ -46,7 +47,7 @@ func TestGetOriginalUseCase_Do(t *testing.T) {
 		storage.AssertNumberOfCalls(t, "GetOriginalURL", 0)
 
 		uc := NewGetOriginalUseCase(storage)
-		original, err := uc.Do("http://localhost/link/")
+		original, err := uc.Do(context.TODO(), "http://localhost/link/")
 
 		assert.Error(t, err)
 		assert.Empty(t, original.String())
