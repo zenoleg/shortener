@@ -6,12 +6,16 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 	"github.com/zenoleg/shortener/internal/domain"
-	"github.com/zenoleg/shortener/internal/usecase"
 )
+
+//go:generate go run github.com/vektra/mockery/v2@v2.43.2 --name=getOriginal
+type getOriginalUseCase interface {
+	Do(domain.URL) (domain.URL, error)
+}
 
 type (
 	GetOriginalURLHandler struct {
-		getOriginal usecase.GetOriginalUseCase
+		getOriginal getOriginalUseCase
 		logger      zerolog.Logger
 	}
 
@@ -24,7 +28,7 @@ type (
 	}
 )
 
-func NewGetOriginalURLHandler(getOriginal usecase.GetOriginalUseCase, logger zerolog.Logger) GetOriginalURLHandler {
+func NewGetOriginalURLHandler(getOriginal getOriginalUseCase, logger zerolog.Logger) GetOriginalURLHandler {
 	return GetOriginalURLHandler{
 		getOriginal: getOriginal,
 		logger:      logger,
