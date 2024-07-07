@@ -1,15 +1,19 @@
 package usecase
 
-import "github.com/zenoleg/shortener/internal/domain"
+import (
+	"context"
+
+	"github.com/zenoleg/shortener/internal/domain"
+)
 
 type GetOriginalForRedirectUseCase struct {
-	storage ReadOnlyStorage
+	storage readOnlyStorage
 }
 
-func NewGetOriginalForRedirectUseCase(storage ReadOnlyStorage) GetOriginalForRedirectUseCase {
+func NewGetOriginalForRedirectUseCase(storage readOnlyStorage) GetOriginalForRedirectUseCase {
 	return GetOriginalForRedirectUseCase{storage: storage}
 }
 
-func (uc GetOriginalForRedirectUseCase) Do(id domain.ID) (domain.URL, error) {
-	return uc.storage.GetOriginalURL(id)
+func (uc GetOriginalForRedirectUseCase) Do(ctx context.Context, id domain.ID) (domain.URL, error) {
+	return uc.storage.GetOriginalURL(ctx, id)
 }

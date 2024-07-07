@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -12,7 +13,7 @@ import (
 
 //go:generate go run github.com/vektra/mockery/v2@v2.43.2 --name=GetShort
 type GetShort interface {
-	Do(query usecase.GetShortURLQuery) (usecase.DestinationURL, error)
+	Do(ctx context.Context, query usecase.GetShortURLQuery) (usecase.DestinationURL, error)
 }
 
 type (
@@ -48,6 +49,7 @@ func (h *GetShortURLHandler) Handle(ectx echo.Context) error {
 	}
 
 	destination, err := h.getShort.Do(
+		ectx.Request().Context(),
 		usecase.NewGetShortURLQuery(
 			ectx.Scheme() == "https",
 			ectx.Request().Host,

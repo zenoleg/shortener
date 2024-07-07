@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"errors"
 	"sync"
 
@@ -23,7 +24,7 @@ func NewInMemoryStorage(store map[string]string) *InMemoryStorage {
 	}
 }
 
-func (s *InMemoryStorage) Store(shortenURL domain.ShortenURL) error {
+func (s *InMemoryStorage) Store(ctx context.Context, shortenURL domain.ShortenURL) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -32,7 +33,7 @@ func (s *InMemoryStorage) Store(shortenURL domain.ShortenURL) error {
 	return nil
 }
 
-func (s *InMemoryStorage) GetOriginalURL(id domain.ID) (domain.URL, error) {
+func (s *InMemoryStorage) GetOriginalURL(ctx context.Context, id domain.ID) (domain.URL, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
