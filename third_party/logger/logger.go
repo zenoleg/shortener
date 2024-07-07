@@ -7,10 +7,6 @@ import (
 	"github.com/rs/zerolog"
 )
 
-func init() {
-	zerolog.ErrorStackMarshaler = marshalStack
-}
-
 func NewLogger(cfg LogConfig, appVersion string) zerolog.Logger {
 	var logger zerolog.Logger
 	if cfg.Fmt() == "console" {

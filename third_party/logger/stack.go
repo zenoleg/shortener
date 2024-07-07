@@ -1,9 +1,5 @@
 package logger
 
-import (
-	"emperror.dev/errors"
-)
-
 var (
 	StackSourceFileName     = "source"
 	StackSourceLineName     = "line"
@@ -33,35 +29,4 @@ func (s *state) Precision() (prec int, ok bool) {
 // Flag implement fmt.Formatter interface.
 func (s *state) Flag(_ int) bool {
 	return false
-}
-
-func frameField(f errors.Frame, s *state, c rune) string {
-	f.Format(s, c)
-	return string(s.b)
-}
-
-// marshalStack implements pkg/errors stack trace marshaling.
-//
-//	zerolog.ErrorStackMarshaler = MarshalStack
-func marshalStack(err error) interface{} {
-	type stackTracer interface {
-		StackTrace() errors.StackTrace
-	}
-
-	var tracer stackTracer
-	if !errors.As(err, &tracer) {
-		return nil
-	}
-
-	st := tracer.StackTrace()
-	s := &state{}
-	out := make([]map[string]string, 0, len(st))
-	for _, frame := range st {
-		out = append(out, map[string]string{
-			StackSourceFileName:     frameField(frame, s, 's'),
-			StackSourceLineName:     frameField(frame, s, 'd'),
-			StackSourceFunctionName: frameField(frame, s, 'n'),
-		})
-	}
-	return out
 }
