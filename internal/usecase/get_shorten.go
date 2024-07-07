@@ -4,9 +4,9 @@ import "github.com/zenoleg/shortener/internal/domain"
 
 type (
 	GetShortURLQuery struct {
-		isSSL       bool
 		host        string
 		originalURL string
+		isSSL       bool
 	}
 
 	GetShortUseCase struct {

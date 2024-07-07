@@ -1,0 +1,43 @@
+run:
+  tests: false
+  timeout: 2m
+  go: '1.22'
+
+linters-settings:
+  gocyclo:
+    min-complexity: 5
+  gosec:
+    excludes:
+      - G101
+      - G107
+      - G109
+      - G110
+      - G303
+      - G401
+      - G404
+      - G501
+  gocritic:
+    enable-all: true
+  goimports:
+    local-prefixes: github.com/zenoleg/shortener
+  govet:
+    enable-all: true
+
+linters:
+  enable:
+    - errorlint
+    - exportloopref
+    - goconst
+    - gocritic
+    - gocyclo
+    - goimports
+    - gosec
+    - makezero
+    - nakedret
+    - nilerr
+    - nolintlint
+    - predeclared
+    - thelper
+    - tparallel
+    - unconvert
+    - wastedassign

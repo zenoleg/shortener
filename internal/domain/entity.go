@@ -19,7 +19,7 @@ type (
 func NewID(id string) (ID, error) {
 	id = strings.TrimSpace(id)
 
-	if len(id) == 0 {
+	if id == "" {
 		return "", errors.New("ID must be not empty")
 	}
 
