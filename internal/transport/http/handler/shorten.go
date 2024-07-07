@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"net/http"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -13,7 +12,7 @@ import (
 
 //go:generate go run github.com/vektra/mockery/v2@v2.43.2 --name=ShortenUseCase
 type ShortenUseCase interface {
-	Do(ctx context.Context, query usecase.ShortenQuery) (usecase.DestinationURL, error)
+	Do(query usecase.ShortenQuery) (usecase.DestinationURL, error)
 }
 
 type (
@@ -49,7 +48,6 @@ func (h *ShortenHandler) Handle(ectx echo.Context) error {
 	}
 
 	destination, err := h.shorten.Do(
-		ectx.Request().Context(),
 		usecase.NewShortenQuery(
 			ectx.Scheme() == "https",
 			ectx.Request().Host,

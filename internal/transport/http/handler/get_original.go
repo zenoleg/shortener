@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"errors"
 	"net/http"
 
@@ -15,7 +14,7 @@ import (
 
 //go:generate go run github.com/vektra/mockery/v2@v2.43.2 --name=GetOriginalUseCase
 type GetOriginalUseCase interface {
-	Do(ctx context.Context, id domain.URL) (domain.URL, error)
+	Do(domain.URL) (domain.URL, error)
 }
 
 type (
@@ -55,7 +54,7 @@ func (h *GetOriginalURLHandler) Handle(ectx echo.Context) error {
 		return ectx.NoContent(http.StatusBadRequest)
 	}
 
-	destination, err := h.getOriginal.Do(ectx.Request().Context(), url)
+	destination, err := h.getOriginal.Do(url)
 
 	if errors.Is(err, storage.ErrURLNotFound) {
 		return ectx.NoContent(http.StatusNotFound)

@@ -1,10 +1,6 @@
 package usecase
 
-import (
-	"context"
-
-	"github.com/zenoleg/shortener/internal/domain"
-)
+import "github.com/zenoleg/shortener/internal/domain"
 
 type (
 	ShortenQuery struct {
@@ -14,8 +10,8 @@ type (
 	}
 
 	ShortenUseCase struct {
-		storage     writeOnlyStorage
-		idGenerator idGenerator
+		storage     WriteOnlyStorage
+		idGenerator IDGenerator
 	}
 )
 
@@ -27,14 +23,14 @@ func NewShortenQuery(isSSL bool, host string, originalURL string) ShortenQuery {
 	}
 }
 
-func NewShortenUseCase(storage writeOnlyStorage, idGenerator idGenerator) ShortenUseCase {
+func NewShortenUseCase(storage WriteOnlyStorage, idGenerator IDGenerator) ShortenUseCase {
 	return ShortenUseCase{
 		storage:     storage,
 		idGenerator: idGenerator,
 	}
 }
 
-func (uc ShortenUseCase) Do(ctx context.Context, query ShortenQuery) (DestinationURL, error) {
+func (uc ShortenUseCase) Do(query ShortenQuery) (DestinationURL, error) {
 	url, err := domain.NewURL(query.originalURL)
 	if err != nil {
 		return "", err
@@ -44,7 +40,7 @@ func (uc ShortenUseCase) Do(ctx context.Context, query ShortenQuery) (Destinatio
 
 	shortenURL := domain.NewShortenURL(id, url)
 
-	err = uc.storage.Store(ctx, shortenURL)
+	err = uc.storage.Store(shortenURL)
 	if err != nil {
 		return "", err
 	}

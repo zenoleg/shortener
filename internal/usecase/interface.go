@@ -1,22 +1,18 @@
 package usecase
 
-import (
-	"context"
+import "github.com/zenoleg/shortener/internal/domain"
 
-	"github.com/zenoleg/shortener/internal/domain"
-)
-
-//go:generate go run github.com/vektra/mockery/v2@v2.43.2 --name=writeOnlyStorage
-type writeOnlyStorage interface {
-	Store(ctx context.Context, shortenURL domain.ShortenURL) error
+//go:generate go run github.com/vektra/mockery/v2@v2.43.2 --name=WriteOnlyStorage
+type WriteOnlyStorage interface {
+	Store(shortenURL domain.ShortenURL) error
 }
 
-//go:generate go run github.com/vektra/mockery/v2@v2.43.2 --name=readOnlyStorage
-type readOnlyStorage interface {
-	GetOriginalURL(ctx context.Context, id domain.ID) (domain.URL, error)
+//go:generate go run github.com/vektra/mockery/v2@v2.43.2 --name=ReadOnlyStorage
+type ReadOnlyStorage interface {
+	GetOriginalURL(id domain.ID) (domain.URL, error)
 }
 
-//go:generate go run github.com/vektra/mockery/v2@v2.43.2 --name=idGenerator
-type idGenerator interface {
+//go:generate go run github.com/vektra/mockery/v2@v2.43.2 --name=IDGenerator
+type IDGenerator interface {
 	Generate(originalURL domain.URL) domain.ID
 }
