@@ -1,36 +1,46 @@
 package http
 
 import (
+	"context"
+	"errors"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-
-	"github.com/zenoleg/shortener/internal/transport/http/handler"
+	"github.com/rs/zerolog"
 )
 
-func NewEcho(
-	shorten handler.ShortenHandler,
-	getShorten handler.GetShortURLHandler,
-	getOriginal handler.GetOriginalURLHandler,
-	redirect handler.RedirectHandler,
-) *echo.Echo {
-	e := echo.New()
-	e.Binder = handler.NewValidationBinder()
-	e.HideBanner = true
+type Server struct {
+	echo   *echo.Echo
+	logger zerolog.Logger
+	cfg    Config
+}
 
-	e.Use(middleware.Recover())
+func NewServer(cfg Config, echoServer *echo.Echo, logger zerolog.Logger) *Server {
+	return &Server{
+		echo:   echoServer,
+		logger: logger,
+		cfg:    cfg,
+	}
+}
 
-	e.GET("/ping", func(ectx echo.Context) error {
-		return ectx.String(http.StatusOK, "pong")
-	})
-	e.GET("/link/:shortID", redirect.Handle)
+func (s *Server) Run() error {
+	s.logger.Info().Msg("starting server")
+	err := s.echo.Start(s.cfg.Address)
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		s.logger.Info().Err(err).Msg("server stopped")
 
-	g := e.Group("/api/v1")
-	g.POST("/shorten", shorten.Handle)
+		return err
+	}
 
-	g.GET("/shorten", getShorten.Handle)
-	g.GET("/original", getOriginal.Handle)
+	s.logger.Info().Msg("server stopped")
 
-	return e
+	return nil
+}
+
+func (s *Server) Shutdown(ctx context.Context) error {
+	if err := s.echo.Shutdown(ctx); err != nil {
+		s.logger.Error().Err(err).Msg("server returned an error")
+	}
+
+	return nil
 }
