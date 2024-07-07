@@ -12,20 +12,20 @@ var ErrURLNotFound = errors.New("Original URL not found")
 type (
 	InMemoryStorage struct {
 		links map[string]string
-		mx    sync.RWMutex
+		mu    sync.RWMutex
 	}
 )
 
 func NewInMemoryStorage(store map[string]string) *InMemoryStorage {
 	return &InMemoryStorage{
 		links: store,
-		mx:    sync.RWMutex{},
+		mu:    sync.RWMutex{},
 	}
 }
 
 func (s *InMemoryStorage) Store(shortenURL domain.ShortenURL) error {
-	s.mx.Lock()
-	defer s.mx.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	s.links[shortenURL.ID()] = shortenURL.OriginalURL()
 
@@ -33,8 +33,8 @@ func (s *InMemoryStorage) Store(shortenURL domain.ShortenURL) error {
 }
 
 func (s *InMemoryStorage) GetOriginalURL(id domain.ID) (domain.URL, error) {
-	s.mx.RLock()
-	defer s.mx.RUnlock()
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	originalURL, ok := s.links[id.String()]
 
