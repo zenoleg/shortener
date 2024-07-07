@@ -3,45 +3,39 @@ package app
 import (
 	"context"
 
-	"github.com/zenoleg/shortener/internal/infrastracture"
-	"github.com/zenoleg/shortener/internal/shortener"
-	"github.com/zenoleg/shortener/internal/transport"
+	"github.com/zenoleg/shortener/internal/domain"
+	"github.com/zenoleg/shortener/internal/storage"
 	"github.com/zenoleg/shortener/internal/transport/http"
+	"github.com/zenoleg/shortener/internal/transport/http/handler"
+	"github.com/zenoleg/shortener/internal/usecase"
 	"github.com/zenoleg/shortener/third_party/logger"
 )
 
 type App struct {
-	server  *http.Server
-	cleanup func()
+	server *http.Server
 }
 
 func Init(appVersion string) (*App, error) {
 	log := logger.NewLogger(logger.NewConfig(), appVersion)
 	transportConfig := http.NewConfig()
 
-	levelDBConfig := infrastracture.NewConfig()
-	levelDBConnection, closeDB, err := infrastracture.NewLevelDBConnection(levelDBConfig, log)
-	if err != nil {
-		return nil, err
-	}
+	idGenerator := domain.NewBase62IDGenerator()
+	store := storage.NewInMemoryStorage(make(map[string]string))
 
-	storage := shortener.NewLevelDBStorage(levelDBConnection, log)
-	shortenUseCase := shortener.NewShortenUseCase(storage)
-	generateShortenUseCase := shortener.NewGenerateShortenUseCase(storage)
-	getOriginalUseCase := shortener.NewGetOriginalUseCase(storage)
-	getOriginalForRedirect := shortener.NewGetOriginalForRedirectUseCase(storage)
+	shortenUseCase := usecase.NewShortenUseCase(store, idGenerator)
+	generateShortenUseCase := usecase.NewGetShortenUseCase(store, idGenerator)
+	getOriginalUseCase := usecase.NewGetOriginalUseCase(store)
+	getOriginalForRedirect := usecase.NewGetOriginalForRedirectUseCase(store)
 
-	shortenHandler := transport.NewShortenHandler(
-		shortenUseCase,
-		generateShortenUseCase,
-		getOriginalUseCase,
-		getOriginalForRedirect,
-		log,
-	)
-	echo := http.NewEcho(shortenHandler)
+	shortenHandler := handler.NewShortenHandler(shortenUseCase, log)
+	generateShortenHandler := handler.NewGetShortURLHandler(generateShortenUseCase, log)
+	getOriginalHandler := handler.NewGetOriginalURLHandler(getOriginalUseCase, log)
+	redirectHandler := handler.NewRedirectHandler(getOriginalForRedirect, log)
+
+	echo := http.NewEcho(shortenHandler, generateShortenHandler, getOriginalHandler, redirectHandler)
 	server := http.NewServer(transportConfig, echo, log)
 
-	return &App{server: server, cleanup: closeDB}, nil
+	return &App{server: server}, nil
 }
 
 func (a *App) Start() error {
@@ -49,7 +43,5 @@ func (a *App) Start() error {
 }
 
 func (a *App) Stop(ctx context.Context) error {
-	defer a.cleanup()
-
 	return a.server.Shutdown(ctx)
 }
