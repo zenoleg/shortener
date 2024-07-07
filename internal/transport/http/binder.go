@@ -1,4 +1,4 @@
-package transport
+package http
 
 import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"

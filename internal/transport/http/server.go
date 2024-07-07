@@ -5,13 +5,12 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/zenoleg/shortener/internal/transport"
 	"github.com/zenoleg/shortener/internal/transport/http/handler"
 )
 
 func NewEcho(shorten handler.ShortenHandler) *echo.Echo {
 	e := echo.New()
-	e.Binder = transport.NewValidationBinder()
+	e.Binder = NewValidationBinder()
 	e.HideBanner = true
 
 	e.Use(middleware.Recover())

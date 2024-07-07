@@ -11,13 +11,13 @@ import (
 )
 
 type App struct {
-	server  *transport.Server
+	server  *http.Server
 	cleanup func()
 }
 
 func Init(appVersion string) (*App, error) {
 	log := logger.NewLogger(logger.NewConfig(), appVersion)
-	transportConfig := transport.NewConfig()
+	transportConfig := http.NewConfig()
 
 	levelDBConfig := infrastracture.NewConfig()
 	levelDBConnection, closeDB, err := infrastracture.NewLevelDBConnection(levelDBConfig, log)
@@ -39,7 +39,7 @@ func Init(appVersion string) (*App, error) {
 		log,
 	)
 	echo := http.NewEcho(shortenHandler)
-	server := transport.NewServer(transportConfig, echo, log)
+	server := http.NewServer(transportConfig, echo, log)
 
 	return &App{server: server, cleanup: closeDB}, nil
 }

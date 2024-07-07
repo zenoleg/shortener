@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/zenoleg/shortener/internal/domain"
 	"github.com/zenoleg/shortener/internal/storage"
-	"github.com/zenoleg/shortener/internal/transport"
+	http2 "github.com/zenoleg/shortener/internal/transport/http"
 	"github.com/zenoleg/shortener/internal/transport/http/handler/mocks"
 )
 
@@ -57,7 +57,7 @@ func TestRedirectHandler_Handle(t *testing.T) {
 
 func makeRedirectTestEnv(t *testing.T, handler RedirectHandler) *httpexpect.Expect {
 	e := echo.New()
-	e.Binder = transport.NewValidationBinder()
+	e.Binder = http2.NewValidationBinder()
 	e.HideBanner = true
 
 	e.Use(middleware.Recover())

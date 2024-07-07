@@ -10,7 +10,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/zenoleg/shortener/internal/transport"
+	http2 "github.com/zenoleg/shortener/internal/transport/http"
 	"github.com/zenoleg/shortener/internal/transport/http/handler/mocks"
 	"github.com/zenoleg/shortener/internal/usecase"
 )
@@ -68,7 +68,7 @@ func TestGetShortURLHandler_Handle(t *testing.T) {
 
 func makeGetShortURLTestEnv(t *testing.T, handler GetShortURLHandler) *httpexpect.Expect {
 	e := echo.New()
-	e.Binder = transport.NewValidationBinder()
+	e.Binder = http2.NewValidationBinder()
 	e.HideBanner = true
 
 	e.Use(middleware.Recover())
