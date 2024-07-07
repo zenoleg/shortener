@@ -6,6 +6,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/syndtr/goleveldb/leveldb"
+
 	"github.com/zenoleg/shortener/internal/domain"
 )
 
