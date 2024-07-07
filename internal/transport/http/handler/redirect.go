@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
@@ -14,7 +15,7 @@ import (
 
 //go:generate go run github.com/vektra/mockery/v2@v2.43.2 --name=GetOriginalForRedirect
 type GetOriginalForRedirect interface {
-	Do(domain.ID) (domain.URL, error)
+	Do(ctx context.Context, id domain.ID) (domain.URL, error)
 }
 
 type (
@@ -45,7 +46,7 @@ func (h *RedirectHandler) Handle(ectx echo.Context) error {
 		return ectx.NoContent(http.StatusBadRequest)
 	}
 
-	destinationURL, err := h.getForRedirect.Do(domain.ID(req.ID))
+	destinationURL, err := h.getForRedirect.Do(ectx.Request().Context(), domain.ID(req.ID))
 
 	if errors.Is(err, storage.ErrURLNotFound) {
 		return ectx.NoContent(http.StatusNotFound)

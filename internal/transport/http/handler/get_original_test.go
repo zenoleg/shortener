@@ -35,7 +35,7 @@ func TestGetOriginalURLHandler_Handle(t *testing.T) {
 	t.Run("When use case fails, then return 500", func(t *testing.T) {
 		getOriginalURL := mocks.NewGetOriginalUseCase(t)
 		getOriginalURL.
-			On("Do", mock.Anything).
+			On("Do", mock.Anything, mock.Anything).
 			Return(domain.URL(""), assert.AnError)
 
 		handler := NewGetOriginalURLHandler(getOriginalURL, zerolog.Logger{})
@@ -51,7 +51,7 @@ func TestGetOriginalURLHandler_Handle(t *testing.T) {
 	t.Run("When url not found, then return 404", func(t *testing.T) {
 		getOriginalURL := mocks.NewGetOriginalUseCase(t)
 		getOriginalURL.
-			On("Do", mock.Anything).
+			On("Do", mock.Anything, mock.Anything).
 			Return(domain.URL(""), storage.ErrURLNotFound).
 			Once()
 
@@ -68,7 +68,7 @@ func TestGetOriginalURLHandler_Handle(t *testing.T) {
 	t.Run("When use case succeeds, then return 200", func(t *testing.T) {
 		getOriginalURL := mocks.NewGetOriginalUseCase(t)
 		getOriginalURL.
-			On("Do", mock.Anything).
+			On("Do", mock.Anything, mock.Anything).
 			Return(domain.URL("https://example.com"), nil)
 
 		handler := NewGetOriginalURLHandler(getOriginalURL, zerolog.Logger{})

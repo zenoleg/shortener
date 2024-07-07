@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -57,7 +58,7 @@ func NewLevelDBStorage(connection *leveldb.DB, logger zerolog.Logger) *LevelDBSt
 	}
 }
 
-func (s LevelDBStorage) Store(shortenURL domain.ShortenURL) error {
+func (s LevelDBStorage) Store(ctx context.Context, shortenURL domain.ShortenURL) error {
 	key := shortenURL.ID()
 	value := shortenURL.OriginalURL()
 

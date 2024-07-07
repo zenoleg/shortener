@@ -21,7 +21,7 @@ func TestRedirectHandler_Handle(t *testing.T) {
 		redirectUseCase := mocks.NewGetOriginalForRedirect(t)
 
 		redirectUseCase.
-			On("Do", mock.Anything).
+			On("Do", mock.Anything, mock.Anything).
 			Return(domain.URL(""), storage.ErrURLNotFound).
 			Once()
 
@@ -38,7 +38,7 @@ func TestRedirectHandler_Handle(t *testing.T) {
 		redirectUseCase := mocks.NewGetOriginalForRedirect(t)
 
 		redirectUseCase.
-			On("Do", mock.Anything).
+			On("Do", mock.Anything, mock.Anything).
 			Return(domain.URL("https://example.com"), nil).
 			Once()
 

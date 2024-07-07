@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	domain "github.com/zenoleg/shortener/internal/domain"
 
 	mock "github.com/stretchr/testify/mock"
@@ -13,9 +15,9 @@ type GetOriginalForRedirect struct {
 	mock.Mock
 }
 
-// Do provides a mock function with given fields: _a0
-func (_m *GetOriginalForRedirect) Do(_a0 domain.ID) (domain.URL, error) {
-	ret := _m.Called(_a0)
+// Do provides a mock function with given fields: ctx, id
+func (_m *GetOriginalForRedirect) Do(ctx context.Context, id domain.ID) (domain.URL, error) {
+	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Do")
@@ -23,17 +25,17 @@ func (_m *GetOriginalForRedirect) Do(_a0 domain.ID) (domain.URL, error) {
 
 	var r0 domain.URL
 	var r1 error
-	if rf, ok := ret.Get(0).(func(domain.ID) (domain.URL, error)); ok {
-		return rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ID) (domain.URL, error)); ok {
+		return rf(ctx, id)
 	}
-	if rf, ok := ret.Get(0).(func(domain.ID) domain.URL); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ID) domain.URL); ok {
+		r0 = rf(ctx, id)
 	} else {
 		r0 = ret.Get(0).(domain.URL)
 	}
 
-	if rf, ok := ret.Get(1).(func(domain.ID) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(context.Context, domain.ID) error); ok {
+		r1 = rf(ctx, id)
 	} else {
 		r1 = ret.Error(1)
 	}

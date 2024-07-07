@@ -34,7 +34,7 @@ func TestShortenHandler_Handle(t *testing.T) {
 	t.Run("When use case fails, then return 500", func(t *testing.T) {
 		shortenUseCase := mocks.NewShortenUseCase(t)
 		shortenUseCase.
-			On("Do", mock.Anything).
+			On("Do", mock.Anything, mock.Anything).
 			Return(usecase.DestinationURL(""), assert.AnError)
 
 		handler := NewShortenHandler(shortenUseCase, zerolog.Logger{})
@@ -50,7 +50,7 @@ func TestShortenHandler_Handle(t *testing.T) {
 	t.Run("When use case succeeds, then return 200", func(t *testing.T) {
 		shortenUseCase := mocks.NewShortenUseCase(t)
 		shortenUseCase.
-			On("Do", mock.Anything).
+			On("Do", mock.Anything, mock.Anything).
 			Return(usecase.DestinationURL("https://example.com"), nil)
 
 		handler := NewShortenHandler(shortenUseCase, zerolog.Logger{})

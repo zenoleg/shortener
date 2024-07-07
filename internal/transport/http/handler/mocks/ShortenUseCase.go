@@ -3,7 +3,10 @@
 package mocks
 
 import (
+	context "context"
+
 	mock "github.com/stretchr/testify/mock"
+
 	usecase "github.com/zenoleg/shortener/internal/usecase"
 )
 
@@ -12,9 +15,9 @@ type ShortenUseCase struct {
 	mock.Mock
 }
 
-// Do provides a mock function with given fields: query
-func (_m *ShortenUseCase) Do(query usecase.ShortenQuery) (usecase.DestinationURL, error) {
-	ret := _m.Called(query)
+// Do provides a mock function with given fields: ctx, query
+func (_m *ShortenUseCase) Do(ctx context.Context, query usecase.ShortenQuery) (usecase.DestinationURL, error) {
+	ret := _m.Called(ctx, query)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Do")
@@ -22,17 +25,17 @@ func (_m *ShortenUseCase) Do(query usecase.ShortenQuery) (usecase.DestinationURL
 
 	var r0 usecase.DestinationURL
 	var r1 error
-	if rf, ok := ret.Get(0).(func(usecase.ShortenQuery) (usecase.DestinationURL, error)); ok {
-		return rf(query)
+	if rf, ok := ret.Get(0).(func(context.Context, usecase.ShortenQuery) (usecase.DestinationURL, error)); ok {
+		return rf(ctx, query)
 	}
-	if rf, ok := ret.Get(0).(func(usecase.ShortenQuery) usecase.DestinationURL); ok {
-		r0 = rf(query)
+	if rf, ok := ret.Get(0).(func(context.Context, usecase.ShortenQuery) usecase.DestinationURL); ok {
+		r0 = rf(ctx, query)
 	} else {
 		r0 = ret.Get(0).(usecase.DestinationURL)
 	}
 
-	if rf, ok := ret.Get(1).(func(usecase.ShortenQuery) error); ok {
-		r1 = rf(query)
+	if rf, ok := ret.Get(1).(func(context.Context, usecase.ShortenQuery) error); ok {
+		r1 = rf(ctx, query)
 	} else {
 		r1 = ret.Error(1)
 	}
