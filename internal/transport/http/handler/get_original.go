@@ -1,21 +1,24 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 	"github.com/zenoleg/shortener/internal/domain"
+	"github.com/zenoleg/shortener/internal/storage"
 )
 
-//go:generate go run github.com/vektra/mockery/v2@v2.43.2 --name=getOriginal
-type getOriginalUseCase interface {
+//go:generate go run github.com/vektra/mockery/v2@v2.43.2 --name=GetOriginalUseCase
+type GetOriginalUseCase interface {
 	Do(domain.URL) (domain.URL, error)
 }
 
 type (
 	GetOriginalURLHandler struct {
-		getOriginal getOriginalUseCase
+		getOriginal GetOriginalUseCase
 		logger      zerolog.Logger
 	}
 
@@ -28,7 +31,7 @@ type (
 	}
 )
 
-func NewGetOriginalURLHandler(getOriginal getOriginalUseCase, logger zerolog.Logger) GetOriginalURLHandler {
+func NewGetOriginalURLHandler(getOriginal GetOriginalUseCase, logger zerolog.Logger) GetOriginalURLHandler {
 	return GetOriginalURLHandler{
 		getOriginal: getOriginal,
 		logger:      logger,
@@ -52,6 +55,10 @@ func (h *GetOriginalURLHandler) Handle(ectx echo.Context) error {
 
 	destination, err := h.getOriginal.Do(url)
 
+	if errors.Is(err, storage.ErrURLNotFound) {
+		return ectx.NoContent(http.StatusNotFound)
+	}
+
 	if err != nil {
 		return ectx.String(
 			http.StatusInternalServerError,
@@ -62,5 +69,11 @@ func (h *GetOriginalURLHandler) Handle(ectx echo.Context) error {
 	return ectx.JSON(
 		http.StatusOK,
 		GetOriginalResponse{Destination: destination.String()},
+	)
+}
+
+func (r GetOriginalRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validation.Field(&r.URL, validation.Required),
 	)
 }
