@@ -37,10 +37,7 @@ func NewLevelDBConnection(cfg Config, logger zerolog.Logger) (*leveldb.DB, func(
 	db, err := leveldb.OpenFile(path, nil)
 
 	if err != nil {
-		return nil, func() {
-			logger.Error().Err(err).Msg("can not open level db")
-			_ = db.Close()
-		}, err
+		panic(err)
 	}
 
 	logger.Info().Msgf("level db successfully opened on '%s'", path)
