@@ -3,14 +3,20 @@ package handler
 import (
 	"net/http"
 
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 	"github.com/zenoleg/shortener/internal/usecase"
 )
 
+//go:generate go run github.com/vektra/mockery/v2@v2.43.2 --name=GetShort
+type GetShort interface {
+	Do(query usecase.GetShortURLQuery) (usecase.DestinationURL, error)
+}
+
 type (
 	GetShortURLHandler struct {
-		getShort usecase.GetShortUseCase
+		getShort GetShort
 		logger   zerolog.Logger
 	}
 
@@ -23,7 +29,7 @@ type (
 	}
 )
 
-func NewGetShortURLHandler(getShort usecase.GetShortUseCase, logger zerolog.Logger) GetShortURLHandler {
+func NewGetShortURLHandler(getShort GetShort, logger zerolog.Logger) GetShortURLHandler {
 	return GetShortURLHandler{
 		getShort: getShort,
 		logger:   logger,
@@ -58,5 +64,11 @@ func (h *GetShortURLHandler) Handle(ectx echo.Context) error {
 	return ectx.JSON(
 		http.StatusOK,
 		GetShortURLResponse{Destination: destination.String()},
+	)
+}
+
+func (r GetShortURLRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validation.Field(&r.URL, validation.Required),
 	)
 }

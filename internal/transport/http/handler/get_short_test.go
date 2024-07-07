@@ -15,65 +15,65 @@ import (
 	"github.com/zenoleg/shortener/internal/usecase"
 )
 
-func TestShortenHandler_Handle(t *testing.T) {
+func TestGetShortURLHandler_Handle(t *testing.T) {
 	t.Parallel()
 
 	t.Run("When request is invalid, then return 400", func(t *testing.T) {
-		shortenUseCase := mocks.NewShortenUseCase(t)
-		shortenUseCase.AssertNumberOfCalls(t, "Do", 0)
+		getShortURL := mocks.NewGetShort(t)
+		getShortURL.AssertNumberOfCalls(t, "Do", 0)
 
-		handler := NewShortenHandler(shortenUseCase, zerolog.Logger{})
+		handler := NewGetShortURLHandler(getShortURL, zerolog.Logger{})
 
-		e := makeShortenTestEnv(t, handler)
+		e := makeGetShortURLTestEnv(t, handler)
 
-		e.POST("/api/v1/shorten").
-			WithJSON(ShortenRequest{URL: ""}).
+		e.GET("/api/v1/shorten").
+			WithQuery("url", "").
 			Expect().
 			Status(http.StatusBadRequest)
 	})
 
 	t.Run("When use case fails, then return 500", func(t *testing.T) {
-		shortenUseCase := mocks.NewShortenUseCase(t)
-		shortenUseCase.
+		getShortURL := mocks.NewGetShort(t)
+		getShortURL.
 			On("Do", mock.Anything).
 			Return(usecase.DestinationURL(""), assert.AnError)
 
-		handler := NewShortenHandler(shortenUseCase, zerolog.Logger{})
+		handler := NewGetShortURLHandler(getShortURL, zerolog.Logger{})
 
-		e := makeShortenTestEnv(t, handler)
+		e := makeGetShortURLTestEnv(t, handler)
 
-		e.POST("/api/v1/shorten").
-			WithJSON(ShortenRequest{URL: "https://example.com"}).
+		e.GET("/api/v1/shorten").
+			WithQuery("url", "https://example.com").
 			Expect().
 			Status(http.StatusInternalServerError)
 	})
 
 	t.Run("When use case succeeds, then return 200", func(t *testing.T) {
-		shortenUseCase := mocks.NewShortenUseCase(t)
-		shortenUseCase.
+		getShortURL := mocks.NewGetShort(t)
+		getShortURL.
 			On("Do", mock.Anything).
 			Return(usecase.DestinationURL("https://example.com"), nil)
 
-		handler := NewShortenHandler(shortenUseCase, zerolog.Logger{})
+		handler := NewGetShortURLHandler(getShortURL, zerolog.Logger{})
 
-		e := makeShortenTestEnv(t, handler)
+		e := makeGetShortURLTestEnv(t, handler)
 
-		e.POST("/api/v1/shorten").
-			WithJSON(ShortenRequest{URL: "https://example.com"}).
+		e.GET("/api/v1/shorten").
+			WithQuery("url", "https://example.com").
 			Expect().
 			Status(http.StatusOK).
 			JSON().Object().HasValue("destination", "https://example.com")
 	})
 }
 
-func makeShortenTestEnv(t *testing.T, handler ShortenHandler) *httpexpect.Expect {
+func makeGetShortURLTestEnv(t *testing.T, handler GetShortURLHandler) *httpexpect.Expect {
 	e := echo.New()
 	e.Binder = transport.NewValidationBinder()
 	e.HideBanner = true
 
 	e.Use(middleware.Recover())
 
-	e.POST("/api/v1/shorten", handler.Handle)
+	e.GET("/api/v1/shorten", handler.Handle)
 
 	return httpexpect.WithConfig(httpexpect.Config{
 		Client: &http.Client{
